@@ -47,6 +47,14 @@ $code = $LASTEXITCODE
 
 switch ($code) {
     0 {
+        # Best-effort: the scrape has already succeeded, and the widget reads
+        # Supabase directly, so a failed Drive copy must not fail the run.
+        try {
+            & (Join-Path $PSScriptRoot 'publish-to-drive.ps1') 2>&1 |
+                Tee-Object -FilePath $log -Append
+        } catch {
+            "Drive copy failed (not fatal): $_" | Tee-Object -FilePath $log -Append
+        }
         "=== finished cleanly ===" | Tee-Object -FilePath $log -Append
     }
     2 {

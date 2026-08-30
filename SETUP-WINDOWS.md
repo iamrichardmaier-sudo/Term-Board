@@ -112,3 +112,24 @@ are untouched.
 | Runs fine, but assignments are empty | Selectors don't match the real markup | `npm run calibrate`, then edit `src/learningsuite/selectors.js` |
 | Six courses always skipped | Their instructors still haven't published | Nothing to do — that's correct behaviour |
 | Task never fires | Laptop shut at 06:00 | It should catch up; check `Get-ScheduledTaskInfo` |
+
+## 6. Optional: let the Term Board refresh itself
+
+The widget reads Supabase directly and needs nothing more. The **Term Board
+artifact** is different: an Artifact runs under a content-security policy that
+blocks every outbound request, so it cannot fetch its own data — it has to be
+regenerated and republished by Claude.
+
+Claude can't reach your Supabase rows (that needs your password), but it can
+already read your Google Drive. So the scrape drops its output there and a daily
+Claude routine picks it up.
+
+```powershell
+winget install Rclone.Rclone
+rclone config          # n → name it "gdrive" → drive → accept the defaults
+```
+
+After that `windows\run-daily.ps1` copies `data\term-board.html` and
+`data\latest.json` into a **Term Board** folder in your Drive on every successful
+run. If rclone isn't installed the step is skipped silently and everything else
+still works — you'd just refresh the board by asking Claude directly.

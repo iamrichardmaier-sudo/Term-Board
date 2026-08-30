@@ -44,6 +44,31 @@ const EXTRA_LINKS = {
   "ARAB 201": [{ label: "Lingco", href: "https://class.lingco.io/courses/159504" }],
 };
 
+/**
+ * Registration facts Learning Suite will not tell us. A waitlisted course looks
+ * exactly like an enrolled one from the outside, and the board has always said
+ * so explicitly — dropping that would quietly turn a maybe into a yes.
+ */
+const WAITLISTED = new Set(["ECON 380", "ECON 381"]);
+
+/**
+ * Dated banners. `until` is what stops a note about a 14-day trial from still
+ * being on the board in December; a notice with no end date never expires.
+ */
+const NOTICES = [
+  {
+    text: "&#9200; Lingco (Al-Kitaab Vol. 2) trial started Aug 29 &mdash; 14 days free, then $105&ndash;140 to keep access.",
+    until: "2026-09-30",
+  },
+];
+
+function noticesSection() {
+  const today = new Date().toISOString().slice(0, 10);
+  return NOTICES.filter((n) => !n.until || n.until >= today)
+    .map((n) => `  <div class="trial-note">${n.text}</div>`)
+    .join("\n");
+}
+
 function courseCard(course) {
   const cls = `course-card ${course.group}${course.published ? "" : " tbd"}`;
   const badgeClass = course.grade?.percent != null ? "grade-badge has-grade" : "grade-badge pending";
@@ -61,14 +86,30 @@ function courseCard(course) {
       <h2>${escape(course.code)}${course.name && course.name !== course.code ? ` &middot; ${escape(course.name)}` : ""}</h2>
       <div class="meet">${MEETING[course.code] || "Meeting time not listed"}</div>
       <div class="${badgeClass}">${escape(course.gradeLabel)}</div>
-      <div class="people">${PEOPLE[course.code] || (course.published ? "Published on Learning Suite" : "Registered")}</div>
+      <div class="people">${
+        PEOPLE[course.code] ||
+        (WAITLISTED.has(course.code)
+          ? `Assuming you clear the waitlist<span class="tag-waitlist">waitlist</span>`
+          : course.published
+            ? "Published on Learning Suite"
+            : "Registered")
+      }</div>
       ${links.length ? `<div class="links">${links
         .map((l) => `<a href="${escape(l.href)}" target="_blank" rel="noopener">${escape(l.label)}</a>`)
         .join("")}</div>` : ""}
     </div>`;
 }
 
-function flagsSection(flags) {
+function flagsSection(flags, seeded) {
+  // A seeded board has not extracted anything yet, so it must not claim that
+  // everything extracted cleanly. Silence here would read as a clean bill of
+  // health, which is the one thing it is not.
+  if (seeded) {
+    return `  <div class="flags">
+    <h3>Reading extraction hasn't run yet</h3>
+    <div class="sub">These assignments came from the manual August pull. The scraper hasn't read their instructions or attachments yet, so nothing is marked conversation-ready and nothing is flagged. Both appear after the first morning run.</div>
+  </div>`;
+  }
   if (!flags.length) {
     return `  <div class="flags">
     <h3>Reading extraction</h3>
@@ -137,12 +178,14 @@ ${css}</style>
 ${snapshot.courses.map(courseCard).join("\n")}
   </div>
 
+${noticesSection()}
+
   <div class="forward">
     <h3>Looking forward</h3>
     <ul id="forwardList"></ul>
   </div>
 
-${flagsSection(snapshot.flags)}
+${flagsSection(snapshot.flags, snapshot.seeded)}
 
   <div class="controls">
     <div class="legend">
@@ -156,7 +199,9 @@ ${flagsSection(snapshot.flags)}
   <div id="weeks"></div>
 
   <footer class="note">
-    Scraped from BYU Learning Suite automatically each morning &mdash; assignments, due dates and gradebook scores for every published course. Courses whose instructors haven't published a syllabus yet show meeting times only. Full semester, including drills, also lives on your Google Calendar; this board is the curated view.
+    ${snapshot.seeded
+      ? `Seeded from the manual Learning Suite pull of 28&ndash;29 August, in the schema the scraper writes. Grades and reading flags fill in from the first automatic run.`
+      : `Scraped from BYU Learning Suite automatically each morning &mdash; assignments, due dates and gradebook scores for every published course.`} Courses whose instructors haven't published a syllabus yet show meeting times only. Full semester, including drills, also lives on your Google Calendar; this board is the curated view.
   </footer>
 </div>
 
@@ -183,10 +228,11 @@ ${flagsSection(snapshot.flags)}
   var scraped = new Date(SCRAPED_AT);
   var ageH = (now - scraped) / 36e5;
   var fresh = document.getElementById('freshness');
-  fresh.textContent = 'Last scrape: ' + scraped.toLocaleString(undefined,
+  var SEEDED = ${snapshot.seeded ? "true" : "false"};
+  fresh.textContent = (SEEDED ? 'Seeded ' : 'Last scrape: ') + scraped.toLocaleString(undefined,
     {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) +
-    (ageH > 36 ? ' — more than a day old' : '');
-  if (ageH > 36) fresh.classList.add('stale');
+    (!SEEDED && ageH > 36 ? ' — more than a day old' : SEEDED ? ' — awaiting the first automatic run' : '');
+  if (!SEEDED && ageH > 36) fresh.classList.add('stale');
 
   function status(d){
     if (!d) return 'later';
