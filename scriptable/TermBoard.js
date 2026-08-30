@@ -49,13 +49,11 @@ const BOARD_URL = "https://iamrichardmaier-sudo.github.io/Term-Board/";
 /**
  * Tried in order, first valid JSON wins.
  *
- * raw.githubusercontent.com comes first because it serves a public repo's files
- * directly — no build, no deploy wait, and it works on any branch. GitHub Pages
- * only publishes from `main`, so until this work is merged the Pages URL is a
- * 404 and the widget would show nothing at all.
- *
- * Pages is kept as a second entry because it serves the same file, so the
- * widget survives either one being unavailable.
+ * raw.githubusercontent.com comes first because it needs nothing set up: it
+ * serves a public repo's files the moment a commit lands, with no build and no
+ * deploy wait. Pages serves the same file behind a nicer URL but has to be
+ * switched on (Settings -> Pages -> main /docs), so it is the second entry
+ * rather than the first — and having both means either one can be down.
  */
 const DATA_URLS = [
   `https://raw.githubusercontent.com/${REPO}/main/docs/board.json`,
