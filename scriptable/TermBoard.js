@@ -40,7 +40,7 @@
  * every run, so "which version is actually on the phone?" is answerable in two
  * seconds instead of by reading a diff.
  */
-const VERSION = "2026-08-31b";
+const VERSION = "2026-08-31c";
 
 const REPO = "iamrichardmaier-sudo/Term-Board";
 
@@ -346,9 +346,9 @@ function upcoming(data, limit) {
  *         "none"   omitted; there is no room and the list matters more
  */
 const LAYOUT = {
-  small:  { pad: 10, title: 12, chip: 8,  row: 10, due: 9,  gap: 2, rows: 4, grades: "none",   labels: false, footer: 8 },
-  medium: { pad: 11, title: 13, chip: 9,  row: 11, due: 10, gap: 2, rows: 6, grades: "inline", labels: false, footer: 8 },
-  large:  { pad: 14, title: 16, chip: 11, row: 13, due: 12, gap: 4, rows: 7, grades: "block",  labels: true,  footer: 10 },
+  small:  { pad: 8,  title: 11, chip: 8,  row: 9,  due: 8,  gap: 1, headGap: 3, rows: 5,  grades: "none",   labels: false, footer: 7 },
+  medium: { pad: 9,  title: 12, chip: 8,  row: 10, due: 9,  gap: 1, headGap: 4, rows: 7,  grades: "inline", labels: false, footer: 7 },
+  large:  { pad: 12, title: 15, chip: 10, row: 12, due: 11, gap: 2, headGap: 6, rows: 9,  grades: "block",  labels: true,  footer: 9 },
 };
 
 function sectionHeader(w, text, trailing) {
@@ -408,7 +408,7 @@ function buildWidget(data, note) {
         const pct = cell.addText(String(Math.round(g.percent)));
         pct.font = Font.boldSystemFont(L.chip);
         pct.textColor = gradeColor(g.percent);
-        head.addSpacer(7);
+        head.addSpacer(6);
       }
     } else {
       const none = head.addText(data.signedIn ? "no grades yet" : "sign in for grades");
@@ -421,7 +421,7 @@ function buildWidget(data, note) {
     term.textColor = new Color(FAINT);
   }
 
-  w.addSpacer(L.grades === "block" ? 8 : 6);
+  w.addSpacer(L.headGap);
 
   // Large keeps the labelled grades block — it has the room, and one course per
   // line is easier to read than a row of chips.
@@ -433,7 +433,7 @@ function buildWidget(data, note) {
       );
       none.font = Font.systemFont(L.row - 1);
       none.textColor = new Color(MUTED);
-      w.addSpacer(2);
+      w.addSpacer(L.gap);
     } else {
       for (const g of grades.slice(0, 4)) {
         const row = w.addStack();
@@ -445,10 +445,10 @@ function buildWidget(data, note) {
         const score = row.addText(g.grade);
         score.font = Font.boldSystemFont(L.row);
         score.textColor = gradeColor(g.percent);
-        w.addSpacer(3);
+        w.addSpacer(L.gap);
       }
     }
-    w.addSpacer(9);
+    w.addSpacer(L.headGap);
   }
 
   const late = overdue(data);
@@ -466,7 +466,7 @@ function buildWidget(data, note) {
     for (const a of list) {
       const row = w.addStack();
       row.centerAlignContent();
-      row.spacing = 5;
+      row.spacing = 4;
 
       const chip = row.addText(shortCode(a.course));
       chip.font = Font.mediumSystemFont(L.chip);

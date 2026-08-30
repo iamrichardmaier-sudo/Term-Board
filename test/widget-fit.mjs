@@ -78,7 +78,7 @@ function makeHarness(family) {
 
 const board = JSON.parse(await fs.readFile(new URL("../docs/board.json", import.meta.url), "utf8"));
 
-console.log("size    padding  content   total   usable   verdict");
+console.log("size    padding  nominal   worst    usable   verdict");
 let failures = 0;
 
 for (const family of ["small", "medium", "large"]) {
@@ -92,22 +92,32 @@ for (const family of ["small", "medium", "large"]) {
 
   context.__build(data);
 
-  let content = 0;
-  for (const item of widget._items) {
-    if (item.kind === "spacer") content += item.value === undefined ? 0 : item.value;
-    else if (item.refs) content += Math.max(...item.refs.map((r) => r.size), 8) * 1.25;
-    else content += (item.ref?.size ?? 12) * 1.25;
-  }
+  // Line height is estimated, so the guard is the pessimistic figure. 1.25 is
+  // about right for SF; 1.4 covers a larger Dynamic Type setting or a device
+  // whose widget is a little shorter than the reference. A layout that only
+  // fits at 1.25 is one accessibility setting away from losing its footer.
+  const measure = (mult) => {
+    let content = 0;
+    for (const item of widget._items) {
+      if (item.kind === "spacer") content += item.value === undefined ? 0 : item.value;
+      else if (item.refs) content += Math.max(...item.refs.map((r) => r.size), 8) * mult;
+      else content += (item.ref?.size ?? 12) * mult;
+    }
+    return content;
+  };
+
   const pad = widget._pad ?? 0;
-  const total = Math.round(content + pad);
-  const usable = USABLE[family] + pad; // USABLE is inner; add padding back for the comparison
-  const fits = total <= usable;
+  const nominal = Math.round(measure(1.25) + pad);
+  const worst = Math.round(measure(1.4) + pad);
+  const usable = USABLE[family] + pad; // USABLE is inner; add padding back
+  const fits = worst <= usable;
   if (!fits) failures++;
   console.log(
-    `${family.padEnd(8)}${String(pad).padEnd(9)}${String(Math.round(content)).padEnd(10)}` +
-    `${String(total).padEnd(8)}${String(usable).padEnd(9)}${fits ? "fits" : "OVERFLOWS"}`,
+    `${family.padEnd(8)}${String(pad).padEnd(9)}${String(nominal).padEnd(10)}` +
+    `${String(worst).padEnd(9)}${String(usable).padEnd(9)}` +
+    `${fits ? "fits" : "OVERFLOWS at 1.4"}`,
   );
 }
 
-assert.equal(failures, 0, `${failures} widget size(s) overflow — rows would be clipped on the home screen`);
-console.log("\n✓ every size fits");
+assert.equal(failures, 0, `${failures} widget size(s) overflow at the pessimistic line height — rows would be clipped on the home screen`);
+console.log("\n✓ every size fits, with margin for a larger text setting");
