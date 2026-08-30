@@ -39,7 +39,11 @@ const SUPABASE_URL = "https://fphpcfecgnfoogfaeihu.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwaHBjZmVjZ25mb29nZmFlaWh1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNzY2NjAsImV4cCI6MjA5OTk1MjY2MH0.2OXlbp8EuQpgv0Mnk5Ps3XbL16-vI8vDDRTWi4yYOk4";
 
-const DEFAULT_EMAIL = "i.am.richard.maier@gmail.com";
+// Must be the SAME Supabase account the scraper signs in as. Row-level
+// security scopes every row to one user, so a mismatch here does not error —
+// it just returns nothing, and the widget looks empty for no visible reason.
+// This matches wazn-review.js, which uses the same Supabase project.
+const DEFAULT_EMAIL = "rbm66@byu.edu";
 const TERM_ID = "fall-2026";
 
 const KEY_EMAIL = "termboard.email";
