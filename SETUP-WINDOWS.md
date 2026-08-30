@@ -7,8 +7,8 @@ the reason in step 4.
 ## 1. Install
 
 ```powershell
-git clone https://github.com/iamrichardmaier-sudo/term-board
-cd term-board
+git clone https://github.com/iamrichardmaier-sudo/Term-Board
+cd Term-Board
 npm install
 npx playwright install chromium
 ```

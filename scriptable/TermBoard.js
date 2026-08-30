@@ -42,9 +42,9 @@
  */
 const VERSION = "2026-08-31a";
 
-const REPO = "iamrichardmaier-sudo/term-board";
+const REPO = "iamrichardmaier-sudo/Term-Board";
 
-const BOARD_URL = "https://iamrichardmaier-sudo.github.io/term-board/";
+const BOARD_URL = "https://iamrichardmaier-sudo.github.io/Term-Board/";
 
 /**
  * Tried in order, first valid JSON wins.

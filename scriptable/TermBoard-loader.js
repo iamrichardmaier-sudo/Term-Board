@@ -26,7 +26,7 @@
  */
 
 const SOURCE_URL =
-  "https://raw.githubusercontent.com/iamrichardmaier-sudo/term-board" +
+  "https://raw.githubusercontent.com/iamrichardmaier-sudo/Term-Board" +
   "/main/scriptable/TermBoard.js";
 
 const CACHE_NAME = "TermBoard.core.js";

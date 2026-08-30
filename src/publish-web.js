@@ -2,8 +2,8 @@
  * Publish the board as static files in docs/, which GitHub Pages serves with no
  * build step and no workflow — Settings -> Pages -> main /docs:
  *
- *   https://iamrichardmaier-sudo.github.io/term-board/
- *   https://iamrichardmaier-sudo.github.io/term-board/board.json
+ *   https://iamrichardmaier-sudo.github.io/Term-Board/
+ *   https://iamrichardmaier-sudo.github.io/Term-Board/board.json
  *
  * This is what lets the Scriptable widget just fetch its data. The Claude
  * artifact could never do that job — artifact URLs need a login, so a widget
@@ -21,7 +21,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { renderBoard } from "./render.js";
 
-const PAGES_URL = "https://iamrichardmaier-sudo.github.io/term-board/";
+const PAGES_URL = "https://iamrichardmaier-sudo.github.io/Term-Board/";
 const ARTIFACT_URL = "https://claude.ai/code/artifact/5a6e40c4-1795-4f6e-8faf-893ab37117f5";
 
 /** Switch to PAGES_URL once public/term-board/ is live on `main`. */

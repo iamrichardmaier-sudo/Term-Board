@@ -48,8 +48,8 @@ Raw serves any branch immediately, with no build step and no deploy wait.
 
 The widget tries these in order and takes the first that returns real JSON:
 
-1. `raw.githubusercontent.com/iamrichardmaier-sudo/term-board/main/docs/board.json`
-2. `iamrichardmaier-sudo.github.io/term-board/board.json`
+1. `raw.githubusercontent.com/iamrichardmaier-sudo/Term-Board/main/docs/board.json`
+2. `iamrichardmaier-sudo.github.io/Term-Board/board.json`
 
 Raw needs nothing set up and answers the moment a commit lands. Pages is the
 same file behind a nicer URL, and needs enabling once:
