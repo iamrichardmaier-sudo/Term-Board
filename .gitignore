@@ -1,0 +1,19 @@
+node_modules/
+
+# Scraped output. Contains grades and copyrighted course reading text —
+# never commit any of this, least of all to a public repository.
+data/
+*.local.json
+
+# The persistent browser profile holds the BYU session and the Duo
+# "remember this device" cookie. It is a credential.
+.browser-profile/
+
+# DPAPI-encrypted NetID password (Windows, user-scoped).
+.credentials/
+
+# Calibration dumps are raw Learning Suite pages — they contain your grades.
+calibration/
+
+.env
+*.log

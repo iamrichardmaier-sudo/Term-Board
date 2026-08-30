@@ -1,0 +1,260 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#F1F2ED;
+  --surface:#FFFFFF;
+  --surface-2:#E9EAE3;
+  --ink:#1B2130;
+  --ink-soft:#5B6272;
+  --ink-faint:#8B92A0;
+  --line:#DDDFD6;
+  --brand:#2C3E64;
+  --arab:#4C5FA0;
+  --arab-soft:#E7E9F5;
+  --ihum:#A6742A;
+  --ihum-soft:#F3E9D6;
+  --econ:#2E7869;
+  --econ-soft:#DFEEE9;
+  --gci:#7A4C7E;
+  --gci-soft:#EFE2EF;
+  --danger:#A6342A;
+  --danger-soft:#F6E1DE;
+  --warn:#C4622E;
+  --warn-soft:#FBE6DA;
+  --ok:#3F7D5C;
+  --ok-soft:#E2EFE8;
+  --shadow: 0 1px 2px rgba(27,33,48,0.06), 0 8px 24px -12px rgba(27,33,48,0.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181B24;
+    --surface:#20242F;
+    --surface-2:#262B37;
+    --ink:#EDEEF2;
+    --ink-soft:#AAAFBD;
+    --ink-faint:#6E7484;
+    --line:#333947;
+    --brand:#8C9EDB;
+    --arab:#8C9EDB;
+    --arab-soft:#2A3050;
+    --ihum:#D9AD5E;
+    --ihum-soft:#3A2F1B;
+    --econ:#6FBFA8;
+    --econ-soft:#1D332C;
+    --gci:#C99BCE;
+    --gci-soft:#332633;
+    --danger:#E38176;
+    --danger-soft:#3A2220;
+    --warn:#E2996A;
+    --warn-soft:#3A2818;
+    --ok:#7FBB9B;
+    --ok-soft:#1E332A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181B24;
+  --surface:#20242F;
+  --surface-2:#262B37;
+  --ink:#EDEEF2;
+  --ink-soft:#AAAFBD;
+  --ink-faint:#6E7484;
+  --line:#333947;
+  --brand:#8C9EDB;
+  --arab:#8C9EDB;
+  --arab-soft:#2A3050;
+  --ihum:#D9AD5E;
+  --ihum-soft:#3A2F1B;
+  --econ:#6FBFA8;
+  --econ-soft:#1D332C;
+  --gci:#C99BCE;
+  --gci-soft:#332633;
+  --danger:#E38176;
+  --danger-soft:#3A2220;
+  --warn:#E2996A;
+  --warn-soft:#3A2818;
+  --ok:#7FBB9B;
+  --ok-soft:#1E332A;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Public Sans', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:920px; margin:0 auto; padding:28px 20px 80px; }
+
+header.top{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:10px 20px; margin-bottom:22px;}
+header.top h1{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:2.2rem;
+  margin:0; letter-spacing:-0.01em; text-wrap:balance;
+}
+header.top .term{ color:var(--ink-soft); font-size:0.95rem; }
+.today-chip{
+  font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--ink-soft);
+  background:var(--surface); border:1px solid var(--line); border-radius:999px;
+  padding:6px 12px; white-space:nowrap;
+}
+
+.courses{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;}
+@media (max-width:640px){ .courses{ grid-template-columns:1fr; } }
+.course-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px; box-shadow:var(--shadow);
+  border-top:3px solid var(--course-accent);
+}
+.course-card.arab{ --course-accent:var(--arab); }
+.course-card.ihum{ --course-accent:var(--ihum); }
+.course-card.econ{ --course-accent:var(--econ); }
+.course-card.gci{ --course-accent:var(--gci); }
+.course-card.tbd{ opacity:0.75; }
+.course-card .tag-waitlist{
+  font-family:'IBM Plex Mono', monospace; font-size:0.68rem; color:var(--warn);
+  background:var(--warn-soft); border-radius:6px; padding:2px 7px; display:inline-block; margin-bottom:8px; margin-left:6px;
+}
+.course-card h2{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:1.15rem; margin:0 0 2px;
+}
+.course-card .meet{ font-size:0.85rem; color:var(--ink-soft); margin-bottom:10px; }
+.course-card .people{ font-size:0.78rem; color:var(--ink-faint); line-height:1.5; margin-bottom:12px;}
+.course-card .links{ display:flex; gap:8px; flex-wrap:wrap; }
+.course-card .links a{
+  font-size:0.76rem; font-weight:600; text-decoration:none; color:var(--course-accent);
+  border:1px solid var(--course-accent); border-radius:8px; padding:5px 10px;
+  transition:background 0.15s, color 0.15s;
+}
+.course-card .links a:hover{ background:var(--course-accent); color:var(--surface); }
+.grade-badge{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink-faint);
+  background:var(--surface-2); border-radius:6px; padding:2px 7px; display:inline-block; margin-bottom:10px;
+}
+
+.trial-note{
+  font-size:0.82rem; color:var(--warn); background:var(--warn-soft); border-radius:10px;
+  padding:8px 14px; margin-bottom:22px; display:flex; align-items:center; gap:8px;
+}
+
+.forward{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px 18px; margin-bottom:26px; box-shadow:var(--shadow);
+}
+.forward h3{
+  font-family:'Fraunces', Georgia, serif; font-size:1rem; font-weight:600; margin:0 0 12px;
+}
+.forward ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+.forward li{ display:flex; align-items:baseline; gap:10px; font-size:0.88rem; }
+.forward .fdate{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; color:var(--ink-faint); font-size:0.76rem; width:74px; flex:none; }
+.forward .fcourse{ font-size:0.68rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; flex:none; }
+.forward .fcourse.arab{ color:var(--arab); }
+.forward .fcourse.ihum{ color:var(--ihum); }
+.forward .ftitle{ color:var(--ink); }
+
+.controls{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.controls .legend{ display:flex; gap:14px; font-size:0.75rem; color:var(--ink-faint); flex-wrap:wrap;}
+.legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle;}
+.dot.overdue{ background:var(--danger); }
+.dot.soon{ background:var(--warn); }
+.dot.later{ background:var(--ink-faint); }
+.toggle-btn{
+  font-family:'Public Sans'; font-size:0.78rem; font-weight:600; color:var(--brand);
+  background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:6px 12px;
+  cursor:pointer;
+}
+.toggle-btn:hover{ background:var(--surface-2); }
+.toggle-btn:focus-visible, a:focus-visible, button:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; }
+
+.week{ margin-bottom:10px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow);}
+.week-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:11px 16px; cursor:pointer; user-select:none; background:var(--surface);
+}
+.week-head:hover{ background:var(--surface-2); }
+.week-head .wtitle{ font-weight:600; font-size:0.88rem; }
+.week-head .wmeta{ font-size:0.74rem; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; }
+.week-head .chev{ transition:transform 0.15s; color:var(--ink-faint); font-size:0.8rem; }
+.week.open .chev{ transform:rotate(90deg); }
+.week-body{ display:none; border-top:1px solid var(--line); }
+.week.open .week-body{ display:block; }
+
+.item{
+  display:grid; grid-template-columns:64px 68px 1fr auto; align-items:center; gap:10px;
+  padding:9px 16px; border-top:1px solid var(--line); font-size:0.85rem;
+}
+.item:first-child{ border-top:none; }
+.item .stripe{ width:3px; align-self:stretch; border-radius:2px; margin-right:4px; }
+.item .idate{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; color:var(--ink-soft); font-size:0.76rem; }
+.item .icourse{ font-size:0.65rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; padding:2px 6px; border-radius:5px; text-align:center; }
+.item .icourse.arab{ color:var(--arab); background:var(--arab-soft); }
+.item .icourse.ihum{ color:var(--ihum); background:var(--ihum-soft); }
+.item .ititle{ color:var(--ink); }
+.item .icat{ font-size:0.7rem; color:var(--ink-faint); white-space:nowrap; }
+.item.minor{ }
+.item.status-overdue .idate{ color:var(--danger); }
+.item.status-soon .idate{ color:var(--warn); }
+
+footer.note{ margin-top:26px; font-size:0.78rem; color:var(--ink-faint); line-height:1.6; }
+footer.note a{ color:var(--brand); }
+
+/* ---------------------------------------------------------------------------
+   Added when the board became scraper-fed. Everything above is the original
+   hand-built board, unchanged, so the existing look is preserved exactly.
+   --------------------------------------------------------------------------- */
+
+/* The original only ever needed ARAB and IHUM chips. Six more courses can
+   appear now, so the ECON and GCI bands get the same treatment. */
+.item .icourse.econ{ color:var(--econ); background:var(--econ-soft); }
+.item .icourse.gci{ color:var(--gci); background:var(--gci-soft); }
+.forward .fcourse.econ{ color:var(--econ); }
+.forward .fcourse.gci{ color:var(--gci); }
+
+/* Assignment rows carry a score now, so the grid gains a column. */
+.item{ grid-template-columns:64px 68px 1fr auto auto; }
+.item .iscore{
+  font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums;
+  font-size:0.72rem; padding:2px 7px; border-radius:6px; white-space:nowrap;
+  background:var(--surface-2); color:var(--ink-soft);
+}
+.item .iscore.good{ background:var(--ok-soft); color:var(--ok); }
+.item .iscore.mid{ background:var(--warn-soft); color:var(--warn); }
+.item .iscore.low{ background:var(--danger-soft); color:var(--danger); }
+.item .iscore.ungraded{ opacity:0.45; }
+
+/* Course grade, replacing the "No grades posted yet" placeholder. */
+.grade-badge.has-grade{
+  background:var(--ok-soft); color:var(--ok); font-weight:600;
+}
+.grade-badge.pending{ opacity:0.8; }
+
+/* Readings that did not survive extraction as clean text. These will not work
+   in a voice walkthrough, and saying so is the whole point of the flag. */
+.flag-chip{
+  font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.02em;
+  color:var(--warn); background:var(--warn-soft); border-radius:5px;
+  padding:2px 6px; white-space:nowrap; cursor:help;
+}
+.flag-chip.image-only{ color:var(--danger); background:var(--danger-soft); }
+
+.flags{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px 18px; margin-bottom:26px; box-shadow:var(--shadow);
+}
+.flags h3{
+  font-family:'Fraunces', Georgia, serif; font-size:1rem; font-weight:600; margin:0 0 6px;
+}
+.flags .sub{ font-size:0.8rem; color:var(--ink-soft); margin-bottom:12px; }
+.flags ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.flags li{ font-size:0.84rem; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+.flags .fl-course{ font-size:0.66rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; flex:none; }
+.flags .fl-why{ color:var(--ink-faint); font-size:0.78rem; width:100%; padding-left:2px; }
+
+/* Provenance line, so a stale board is obvious rather than quietly wrong. */
+.freshness{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+  color:var(--ink-faint); margin-bottom:18px;
+}
+.freshness.stale{ color:var(--warn); }
