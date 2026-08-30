@@ -4,15 +4,20 @@
   "private": true,
   "type": "module",
   "description": "Daily BYU Learning Suite scraper feeding the Term Board dashboard and the TermBoard iOS Scriptable widget.",
-  "engines": { "node": ">=20" },
-  "bin": { "term-board": "./src/index.js" },
+  "engines": {
+    "node": ">=20"
+  },
+  "bin": {
+    "term-board": "./src/index.js"
+  },
   "scripts": {
     "login": "node src/index.js login",
     "scrape": "node src/index.js scrape",
     "dry-run": "node src/index.js scrape --no-push",
     "calibrate": "node src/index.js calibrate",
     "doctor": "node src/index.js doctor",
-    "render": "node src/index.js render"
+    "render": "node src/index.js render",
+    "web": "node src/index.js web"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

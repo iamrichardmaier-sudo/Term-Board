@@ -14,20 +14,52 @@ the Google Calendar by hand.
 ## How it fits together
 
 ```
-  Lenovo, 6am                    Supabase (private, RLS)         Your phone
-  ┌───────────────┐              ┌──────────────────────┐        ┌──────────┐
-  │ Task Scheduler│─── scrape ──▶│ term_board_snapshots │◀──────│ TermBoard │
-  │  Playwright   │              │ term_board_readings  │        │  widget   │
-  │  + Chromium   │              └──────────────────────┘        └──────────┘
-  └───────────────┘                        │
-          │                                │  daily Claude routine
-          └── data/term-board.html ────────┴──▶ republishes the Term Board artifact
+  Lenovo, 6am                 GitHub (public)                Your phone
+  ┌───────────────┐           ┌────────────────────┐        ┌───────────┐
+  │ Task Scheduler│── push ──▶│ docs/index.html    │──────▶ │ TermBoard │
+  │  Playwright   │           │ docs/board.json    │ sched. │  widget   │
+  │  + Chromium   │           └────────────────────┘        └───────────┘
+  └───────────────┘
+          │                                                       ▲
+          │                   Supabase (private, RLS)             │
+          │                   ┌──────────────────────┐            │
+          └──── publish ─────▶│ term_board_snapshots │── grades ──┘
+                              │ term_board_readings  │
+                              └──────────────────────┘
 ```
 
-The artifact is regenerated rather than fetching for itself, because an Artifact
-runs under a content-security policy that blocks every outbound request. It
-cannot poll. So the scraper renders the HTML and a scheduled Claude routine
-publishes it to the same URL.
+**The split is deliberate.** This repository is public — it has to be, because
+the widget fetches `board.json` with no credentials — so the committed files
+carry the *schedule* only — assignment
+titles and due dates, which is syllabus information. **Grades never go there.**
+They live in Supabase behind row-level security, and the widget fetches them
+signed in as you. If you skip the sign-in, the schedule still works and the
+grades section says so.
+
+Hosting the board in the repo is also what makes the widget possible at all: a
+Claude artifact URL requires a login, so fetching one from Scriptable returns the
+app shell or a 403, never the board.
+
+### Where the widget actually reads from
+
+`raw.githubusercontent.com`, not Pages. Pages only publishes from `main`, so
+until this work is merged the Pages URL is a 404 and the widget shows nothing.
+Raw serves any branch immediately, with no build step and no deploy wait.
+
+The widget tries these in order and takes the first that returns real JSON:
+
+1. `raw.githubusercontent.com/iamrichardmaier-sudo/term-board/main/docs/board.json`
+2. `iamrichardmaier-sudo.github.io/term-board/board.json`
+
+Raw needs nothing set up and answers the moment a commit lands. Pages is the
+same file behind a nicer URL, and needs enabling once:
+**Settings → Pages → Source: `main` / `docs`**.
+
+### If you want grades on the public page anyway
+
+`npm run web -- --publish-grades` includes them. `windows/publish-to-repo.ps1`
+will refuse to push that to the public repo unless you do it by hand — the check
+is there because a gradebook on an indexable URL is hard to take back.
 
 ## Setup
 
@@ -52,8 +84,10 @@ powershell -ExecutionPolicy Bypass -File windows\install-task.ps1
 | `npm run dry-run` | The same, without touching Supabase. |
 | `npm run calibrate` | Dumps Learning Suite's real markup to `calibration/`. See below. |
 | `npm run render` | Rebuilds the board HTML from the last snapshot. |
+| `npm run web` | Writes the hosted board into `../public/term-board`. |
 | `npm run doctor` | Checks the setup without touching Learning Suite. |
 | `node test/smoke.mjs` | Tests the date parsing, payload building and rendering. |
+| `node test/widget-logic.mjs` | Tests the widget's date bucketing and grade merge. |
 
 ## The selectors need one calibration pass
 
@@ -116,6 +150,7 @@ src/
   scrape.js           orchestrates one full pass
   normalize.js        raw scrape -> snapshot + readings
   render.js           snapshot -> Term Board HTML
+  publish-web.js      snapshot -> public/term-board (grades withheld)
   supabase.js         publish / fetch
   dates.js            Learning Suite dates -> ISO with the right Mountain offset
   credentials.js      DPAPI storage
@@ -128,8 +163,9 @@ src/
     pdf.js            pdf.js text + scanned detection
     html.js           HTML -> text
   template/styles.css the Term Board's own CSS, reused unchanged
-scriptable/TermBoard.js
+scriptable/TermBoard.js         the widget
+scriptable/TermBoard-loader.js  optional: fetches the above at run time
 supabase/001_term_board.sql
-windows/run-daily.ps1  install-task.ps1
+windows/run-daily.ps1  install-task.ps1  publish-to-repo.ps1
 test/smoke.mjs
 ```

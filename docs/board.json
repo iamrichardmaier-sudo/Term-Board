@@ -1,0 +1,1242 @@
+{
+  "term": "Fall 2026",
+  "generatedAt": "2026-08-30T14:02:10.690Z",
+  "seeded": true,
+  "gradesArePrivate": true,
+  "boardUrl": "https://claude.ai/code/artifact/5a6e40c4-1795-4f6e-8faf-893ab37117f5",
+  "pagesUrl": "https://iamrichardmaier-sudo.github.io/term-board/",
+  "grades": [],
+  "courses": [
+    {
+      "course": "ARAB 201",
+      "name": "2nd-Year Arabic",
+      "group": "arab",
+      "published": true
+    },
+    {
+      "course": "IHUM 242",
+      "name": "Islamic Humanities",
+      "group": "ihum",
+      "published": true
+    },
+    {
+      "course": "ECON 378",
+      "name": "ECON 378",
+      "group": "econ",
+      "published": false
+    },
+    {
+      "course": "ECON 380",
+      "name": "ECON 380",
+      "group": "econ",
+      "published": false
+    },
+    {
+      "course": "ECON 381",
+      "name": "ECON 381",
+      "group": "econ",
+      "published": false
+    },
+    {
+      "course": "ECON 210",
+      "name": "Career Prep",
+      "group": "econ",
+      "published": false
+    },
+    {
+      "course": "GCI 320",
+      "name": "Implementing Social Impact",
+      "group": "gci",
+      "published": false
+    },
+    {
+      "course": "GCI 330",
+      "name": "Evaluating Social Impact",
+      "group": "gci",
+      "published": false
+    }
+  ],
+  "assignments": [
+    {
+      "id": "arab-201-quiz-13-1",
+      "course": "ARAB 201",
+      "title": "Quiz 13.1",
+      "due": "2026-09-03T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-13-2",
+      "course": "ARAB 201",
+      "title": "Quiz 13.2",
+      "due": "2026-09-09T08:00:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-13-3",
+      "course": "ARAB 201",
+      "title": "Quiz 13.3",
+      "due": "2026-09-11T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-ak2-1-1",
+      "course": "ARAB 201",
+      "title": "Quiz AK2 1.1",
+      "due": "2026-09-18T12:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-1-2",
+      "course": "ARAB 201",
+      "title": "Quiz 1.2",
+      "due": "2026-09-23T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-1-3",
+      "course": "ARAB 201",
+      "title": "Quiz 1.3",
+      "due": "2026-09-30T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-2-1",
+      "course": "ARAB 201",
+      "title": "Quiz 2.1",
+      "due": "2026-10-07T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-2-2",
+      "course": "ARAB 201",
+      "title": "Quiz 2.2",
+      "due": "2026-10-09T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-3-1",
+      "course": "ARAB 201",
+      "title": "Quiz 3.1",
+      "due": "2026-10-20T23:59:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-3-2",
+      "course": "ARAB 201",
+      "title": "Quiz 3.2",
+      "due": "2026-10-23T13:00:00-06:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-4-1",
+      "course": "ARAB 201",
+      "title": "Quiz 4.1",
+      "due": "2026-11-03T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-4-2",
+      "course": "ARAB 201",
+      "title": "Quiz 4.2",
+      "due": "2026-11-06T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-4-3",
+      "course": "ARAB 201",
+      "title": "Quiz 4.3",
+      "due": "2026-11-16T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-5-1",
+      "course": "ARAB 201",
+      "title": "Quiz 5.1",
+      "due": "2026-11-18T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-5-2",
+      "course": "ARAB 201",
+      "title": "Quiz 5.2",
+      "due": "2026-11-20T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-quiz-5-3",
+      "course": "ARAB 201",
+      "title": "Quiz 5.3",
+      "due": "2026-11-30T23:59:00-07:00",
+      "category": "Vocab Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-13-6",
+      "course": "ARAB 201",
+      "title": "13.6",
+      "due": "2026-09-03T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-13-7",
+      "course": "ARAB 201",
+      "title": "13.7",
+      "due": "2026-09-09T08:00:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-13-12",
+      "course": "ARAB 201",
+      "title": "13.12",
+      "due": "2026-09-11T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-1-1",
+      "course": "ARAB 201",
+      "title": "1.1",
+      "due": "2026-09-21T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-1-7",
+      "course": "ARAB 201",
+      "title": "1.7",
+      "due": "2026-09-22T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-1-24",
+      "course": "ARAB 201",
+      "title": "1.24",
+      "due": "2026-09-28T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-vocab-sentences",
+      "course": "ARAB 201",
+      "title": "Vocab Sentences",
+      "due": "2026-10-07T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-2-13",
+      "course": "ARAB 201",
+      "title": "2.13",
+      "due": "2026-10-12T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-2-31",
+      "course": "ARAB 201",
+      "title": "2.31",
+      "due": "2026-10-16T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-3-17",
+      "course": "ARAB 201",
+      "title": "3.17",
+      "due": "2026-10-23T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-3-19",
+      "course": "ARAB 201",
+      "title": "3.19",
+      "due": "2026-10-23T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-3-14",
+      "course": "ARAB 201",
+      "title": "3.14",
+      "due": "2026-10-26T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-3-11",
+      "course": "ARAB 201",
+      "title": "3.11",
+      "due": "2026-10-27T23:59:00-06:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-4-8",
+      "course": "ARAB 201",
+      "title": "4.8",
+      "due": "2026-11-09T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-drill-2",
+      "course": "ARAB 201",
+      "title": "Drill 2",
+      "due": "2026-11-18T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-drill-15",
+      "course": "ARAB 201",
+      "title": "Drill 15",
+      "due": "2026-11-24T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-drill-22",
+      "course": "ARAB 201",
+      "title": "Drill 22",
+      "due": "2026-12-02T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-drill-21",
+      "course": "ARAB 201",
+      "title": "Drill 21",
+      "due": "2026-12-03T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-drill-24",
+      "course": "ARAB 201",
+      "title": "Drill 24",
+      "due": "2026-12-08T23:59:00-07:00",
+      "category": "AK Activity",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-ii",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form II",
+      "due": "2026-09-25T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-iii",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form III",
+      "due": "2026-09-28T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-iv",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form IV",
+      "due": "2026-09-29T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-v",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form V",
+      "due": "2026-09-30T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-vi",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form VI",
+      "due": "2026-10-01T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-vii",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form VII",
+      "due": "2026-10-02T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-viii",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form VIII",
+      "due": "2026-10-06T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-verb-chart-form-x",
+      "course": "ARAB 201",
+      "title": "Verb Chart: Form X",
+      "due": "2026-10-07T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-9-form-iii",
+      "course": "ARAB 201",
+      "title": "10/9 Form III",
+      "due": "2026-10-08T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-10-form-iv",
+      "course": "ARAB 201",
+      "title": "10/10 Form IV",
+      "due": "2026-10-09T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-11-form-v",
+      "course": "ARAB 201",
+      "title": "10/11 Form V",
+      "due": "2026-10-12T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-14-form-vi",
+      "course": "ARAB 201",
+      "title": "10/14 Form VI",
+      "due": "2026-10-13T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-15-form-vii",
+      "course": "ARAB 201",
+      "title": "10/15 Form VII",
+      "due": "2026-10-14T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-16-form-viii",
+      "course": "ARAB 201",
+      "title": "10/16 Form VIII",
+      "due": "2026-10-15T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-21-form-iii",
+      "course": "ARAB 201",
+      "title": "10/21 Form III",
+      "due": "2026-10-20T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-18-form-x",
+      "course": "ARAB 201",
+      "title": "10/18 Form X",
+      "due": "2026-10-20T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-22-form-iv",
+      "course": "ARAB 201",
+      "title": "10/22 Form IV",
+      "due": "2026-10-21T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-23-form-v",
+      "course": "ARAB 201",
+      "title": "10/23 Form V",
+      "due": "2026-10-22T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-24-form-vi",
+      "course": "ARAB 201",
+      "title": "10/24 Form VI",
+      "due": "2026-10-23T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-25-form-vii",
+      "course": "ARAB 201",
+      "title": "10/25 Form VII",
+      "due": "2026-10-26T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-28-form-viii",
+      "course": "ARAB 201",
+      "title": "10/28 Form VIII",
+      "due": "2026-10-27T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-10-29-form-x",
+      "course": "ARAB 201",
+      "title": "10/29 Form X",
+      "due": "2026-10-28T23:59:00-06:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-4-form-ii",
+      "course": "ARAB 201",
+      "title": "11/4 Form II",
+      "due": "2026-11-03T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-5-form-iii",
+      "course": "ARAB 201",
+      "title": "11/5 Form III",
+      "due": "2026-11-04T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-6-form-iv",
+      "course": "ARAB 201",
+      "title": "11/6 Form IV",
+      "due": "2026-11-05T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-7-form-1",
+      "course": "ARAB 201",
+      "title": "11/7 Form 1 (قضى)",
+      "due": "2026-11-06T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-8-form-1",
+      "course": "ARAB 201",
+      "title": "11/8 Form 1 (بقي)",
+      "due": "2026-11-09T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-11-form-iv-hollow",
+      "course": "ARAB 201",
+      "title": "11/11 Form IV Hollow (أراد)",
+      "due": "2026-11-10T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-12-form-viii",
+      "course": "ARAB 201",
+      "title": "11/12 Form VIII (انتهى)",
+      "due": "2026-11-11T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-13-form-x",
+      "course": "ARAB 201",
+      "title": "11/13 Form X (استطاع)",
+      "due": "2026-11-12T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-14-form-ii",
+      "course": "ARAB 201",
+      "title": "11/14 Form II",
+      "due": "2026-11-13T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-15-form-iii",
+      "course": "ARAB 201",
+      "title": "11/15 Form III",
+      "due": "2026-11-16T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-18-form-iv",
+      "course": "ARAB 201",
+      "title": "11/18 Form IV",
+      "due": "2026-11-17T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-19-form-v",
+      "course": "ARAB 201",
+      "title": "11/19 Form V",
+      "due": "2026-11-18T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-20-form-vi",
+      "course": "ARAB 201",
+      "title": "11/20 Form VI",
+      "due": "2026-11-19T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-21-form-vii",
+      "course": "ARAB 201",
+      "title": "11/21 Form VII",
+      "due": "2026-11-20T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-22-form-viii",
+      "course": "ARAB 201",
+      "title": "11/22 Form VIII",
+      "due": "2026-11-23T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-11-25-form-x",
+      "course": "ARAB 201",
+      "title": "11/25 Form X",
+      "due": "2026-11-24T23:59:00-07:00",
+      "category": "Verb Chart",
+      "minor": true,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-1",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 1",
+      "due": "2026-09-15T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-2",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 2",
+      "due": "2026-09-22T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-3",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 3",
+      "due": "2026-09-28T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-4",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 4",
+      "due": "2026-10-03T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-5",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 5",
+      "due": "2026-10-10T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-6",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 6",
+      "due": "2026-10-17T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-7",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 7",
+      "due": "2026-10-24T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-8-midterm-oral",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 8 (Midterm Oral)",
+      "due": "2026-10-31T12:59:00-06:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-9",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 9",
+      "due": "2026-11-07T12:59:00-07:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-10",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 10",
+      "due": "2026-11-14T12:59:00-07:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-speaking-appointment-11-final-oral",
+      "course": "ARAB 201",
+      "title": "Speaking Appointment 11 (Final Oral)",
+      "due": "2026-12-02T12:59:00-07:00",
+      "category": "Speaking",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-chapter-13-test",
+      "course": "ARAB 201",
+      "title": "Chapter 13 Test",
+      "due": "2026-09-30T23:59:00-06:00",
+      "category": "Test",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-chapter-1-test",
+      "course": "ARAB 201",
+      "title": "Chapter 1 Test",
+      "due": "2026-10-05T23:59:00-06:00",
+      "category": "Test",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-chapter-2-test",
+      "course": "ARAB 201",
+      "title": "Chapter 2 Test",
+      "due": "2026-10-20T23:59:00-06:00",
+      "category": "Test",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-chapter-4-test",
+      "course": "ARAB 201",
+      "title": "Chapter 4 Test",
+      "due": "2026-11-16T23:59:00-07:00",
+      "category": "Test",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-midterm-vocab",
+      "course": "ARAB 201",
+      "title": "Midterm — Vocab",
+      "due": "2026-11-06T23:59:00-07:00",
+      "category": "Midterm",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-midterm-written",
+      "course": "ARAB 201",
+      "title": "Midterm — Written",
+      "due": "2026-11-10T23:59:00-07:00",
+      "category": "Midterm",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "arab-201-final-exam",
+      "course": "ARAB 201",
+      "title": "FINAL EXAM",
+      "due": "2026-12-10T23:59:00-07:00",
+      "category": "Final",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-syllabus-quiz",
+      "course": "IHUM 242",
+      "title": "Syllabus Quiz",
+      "due": "2026-09-08T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-1",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 1",
+      "due": "2026-09-10T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-map-assignment",
+      "course": "IHUM 242",
+      "title": "Map assignment",
+      "due": "2026-09-10T23:59:00-06:00",
+      "category": "Assignment",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-kickoff-essay",
+      "course": "IHUM 242",
+      "title": "Kickoff Essay",
+      "due": "2026-09-10T23:59:00-06:00",
+      "category": "Essay",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-2",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 2",
+      "due": "2026-09-15T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-3",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 3",
+      "due": "2026-09-17T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-4",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 4",
+      "due": "2026-09-22T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-5",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 5",
+      "due": "2026-09-24T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-6",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 6",
+      "due": "2026-09-29T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-short-paper-1-the-interview",
+      "course": "IHUM 242",
+      "title": "Short Paper 1: The Interview",
+      "due": "2026-10-01T09:30:00-06:00",
+      "category": "Paper",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-7",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 7",
+      "due": "2026-10-08T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-essay-on-dr-shirinov-s-lecture",
+      "course": "IHUM 242",
+      "title": "Essay on Dr. Shirinov's lecture",
+      "due": "2026-10-08T23:59:00-06:00",
+      "category": "Essay",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-8",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 8",
+      "due": "2026-10-13T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-midterm-exam",
+      "course": "IHUM 242",
+      "title": "Midterm Exam",
+      "due": "2026-10-17T23:59:00-06:00",
+      "category": "Midterm",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-9",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 9",
+      "due": "2026-10-20T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-10",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 10",
+      "due": "2026-10-22T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-11",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 11",
+      "due": "2026-10-27T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-12",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 12",
+      "due": "2026-10-29T09:30:00-06:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-short-paper-2-the-rebuttal",
+      "course": "IHUM 242",
+      "title": "Short Paper 2: The Rebuttal",
+      "due": "2026-11-03T09:30:00-07:00",
+      "category": "Paper",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-13",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 13",
+      "due": "2026-11-05T09:30:00-07:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-14",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 14",
+      "due": "2026-11-10T09:30:00-07:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-15",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 15",
+      "due": "2026-11-12T09:30:00-07:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-short-paper-3-the-artist-s-diary",
+      "course": "IHUM 242",
+      "title": "Short Paper 3: The Artist's Diary",
+      "due": "2026-11-19T09:30:00-07:00",
+      "category": "Paper",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-readings-quiz-16",
+      "course": "IHUM 242",
+      "title": "Readings Quiz 16",
+      "due": "2026-11-17T09:30:00-07:00",
+      "category": "Quiz",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-final-presentation",
+      "course": "IHUM 242",
+      "title": "Final Presentation",
+      "due": "2026-12-08T23:59:00-07:00",
+      "category": "Presentation",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-why-are-you-in-college-final-reflections-essay",
+      "course": "IHUM 242",
+      "title": "Why Are You in College? Final Reflections Essay",
+      "due": "2026-12-09T23:59:00-07:00",
+      "category": "Essay",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    },
+    {
+      "id": "ihum-242-final-exam",
+      "course": "IHUM 242",
+      "title": "FINAL EXAM",
+      "due": "2026-12-10T23:59:00-07:00",
+      "category": "Final",
+      "minor": false,
+      "conversationReady": false,
+      "textQuality": "unknown"
+    }
+  ],
+  "flags": []
+}

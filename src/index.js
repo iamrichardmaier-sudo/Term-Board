@@ -44,6 +44,9 @@ try {
     case "render":
       await cmdRender();
       break;
+    case "web":
+      await cmdWeb();
+      break;
     case "doctor":
       await cmdDoctor();
       break;
@@ -119,30 +122,51 @@ async function cmdScrape() {
   await fs.writeFile(path.join(PATHS.data, "term-board.html"), html, "utf8");
   log.info(`✓ board HTML written to ${path.join(PATHS.data, "term-board.html")}`);
 
+  // Refresh the copy GitHub Pages serves and the widget reads.
+  const { publishWeb } = await import("./publish-web.js");
+  await publishWeb(snapshot, "docs", {
+    publishGrades: flags.has("--publish-grades"),
+  });
+
   await writeStatus({ ok: true, needsReauth: false, stats: s, scrapedAt: snapshot.scrapedAt });
 }
 
 async function cmdRender() {
-  const from = valueOf("from");
-  let snapshot;
-  if (from) {
-    snapshot = JSON.parse(await fs.readFile(from, "utf8"));
-  } else {
-    const local = path.join(PATHS.data, "latest.json");
-    try {
-      snapshot = JSON.parse(await fs.readFile(local, "utf8"));
-      log.step(`rendering from ${local}`);
-    } catch {
-      const { fetchLatestSnapshot } = await import("./supabase.js");
-      snapshot = await fetchLatestSnapshot();
-      if (!snapshot) throw new Error("No snapshot found locally or in Supabase. Run `npm run scrape` first.");
-    }
-  }
+  const snapshot = await loadSnapshot(valueOf("from"));
   const out = valueOf("out") || path.join(PATHS.data, "term-board.html");
   const { renderBoard } = await import("./render.js");
   await fs.mkdir(path.dirname(out), { recursive: true });
   await fs.writeFile(out, await renderBoard(snapshot), "utf8");
   log.info(`✓ ${out}`);
+}
+
+/**
+ * Write the hosted board into the repo's public/ directory, which GitHub Pages
+ * serves and the Scriptable widget fetches.
+ */
+async function cmdWeb() {
+  const snapshot = await loadSnapshot(valueOf("from"));
+  const outDir = valueOf("out") || "docs";
+  const { publishWeb } = await import("./publish-web.js");
+  await publishWeb(snapshot, outDir, { publishGrades: flags.has("--publish-grades") });
+  log.info("  Commit and push, and Pages will redeploy it.");
+}
+
+async function loadSnapshot(from) {
+  if (from) return JSON.parse(await fs.readFile(from, "utf8"));
+  const local = path.join(PATHS.data, "latest.json");
+  try {
+    const snapshot = JSON.parse(await fs.readFile(local, "utf8"));
+    log.step(`using ${local}`);
+    return snapshot;
+  } catch {
+    const { fetchLatestSnapshot } = await import("./supabase.js");
+    const snapshot = await fetchLatestSnapshot();
+    if (!snapshot) {
+      throw new Error("No snapshot found locally or in Supabase. Run `npm run scrape` first.");
+    }
+    return snapshot;
+  }
 }
 
 async function cmdDoctor() {
@@ -214,7 +238,9 @@ function usage() {
   npm run dry-run               scrape without publishing to Supabase
   npm run calibrate             dump Learning Suite markup for fixing selectors
   npm run render                rebuild the board HTML from the last snapshot
+  npm run web                   write the hosted board into docs/ (GitHub Pages)
   npm run doctor                check the setup
 
-Flags: --headed  --no-push  --no-content  --only=ARAB 201  --from=file  --out=file`);
+Flags: --headed  --no-push  --no-content  --only=ARAB 201  --from=file  --out=dir
+       --publish-grades   include scores in the PUBLIC hosted board (off by default)`);
 }

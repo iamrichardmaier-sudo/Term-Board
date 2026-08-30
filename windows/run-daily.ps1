@@ -49,11 +49,12 @@ switch ($code) {
     0 {
         # Best-effort: the scrape has already succeeded, and the widget reads
         # Supabase directly, so a failed Drive copy must not fail the run.
-        try {
-            & (Join-Path $PSScriptRoot 'publish-to-drive.ps1') 2>&1 |
-                Tee-Object -FilePath $log -Append
-        } catch {
-            "Drive copy failed (not fatal): $_" | Tee-Object -FilePath $log -Append
+        foreach ($step in @('publish-to-repo.ps1', 'publish-to-drive.ps1')) {
+            try {
+                & (Join-Path $PSScriptRoot $step) 2>&1 | Tee-Object -FilePath $log -Append
+            } catch {
+                "$step failed (not fatal): $_" | Tee-Object -FilePath $log -Append
+            }
         }
         "=== finished cleanly ===" | Tee-Object -FilePath $log -Append
     }

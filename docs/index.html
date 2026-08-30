@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+<style>:root{color-scheme:light dark}html,body{margin:0;padding:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>Term Board</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#F1F2ED;
+  --surface:#FFFFFF;
+  --surface-2:#E9EAE3;
+  --ink:#1B2130;
+  --ink-soft:#5B6272;
+  --ink-faint:#8B92A0;
+  --line:#DDDFD6;
+  --brand:#2C3E64;
+  --arab:#4C5FA0;
+  --arab-soft:#E7E9F5;
+  --ihum:#A6742A;
+  --ihum-soft:#F3E9D6;
+  --econ:#2E7869;
+  --econ-soft:#DFEEE9;
+  --gci:#7A4C7E;
+  --gci-soft:#EFE2EF;
+  --danger:#A6342A;
+  --danger-soft:#F6E1DE;
+  --warn:#C4622E;
+  --warn-soft:#FBE6DA;
+  --ok:#3F7D5C;
+  --ok-soft:#E2EFE8;
+  --shadow: 0 1px 2px rgba(27,33,48,0.06), 0 8px 24px -12px rgba(27,33,48,0.18);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#181B24;
+    --surface:#20242F;
+    --surface-2:#262B37;
+    --ink:#EDEEF2;
+    --ink-soft:#AAAFBD;
+    --ink-faint:#6E7484;
+    --line:#333947;
+    --brand:#8C9EDB;
+    --arab:#8C9EDB;
+    --arab-soft:#2A3050;
+    --ihum:#D9AD5E;
+    --ihum-soft:#3A2F1B;
+    --econ:#6FBFA8;
+    --econ-soft:#1D332C;
+    --gci:#C99BCE;
+    --gci-soft:#332633;
+    --danger:#E38176;
+    --danger-soft:#3A2220;
+    --warn:#E2996A;
+    --warn-soft:#3A2818;
+    --ok:#7FBB9B;
+    --ok-soft:#1E332A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#181B24;
+  --surface:#20242F;
+  --surface-2:#262B37;
+  --ink:#EDEEF2;
+  --ink-soft:#AAAFBD;
+  --ink-faint:#6E7484;
+  --line:#333947;
+  --brand:#8C9EDB;
+  --arab:#8C9EDB;
+  --arab-soft:#2A3050;
+  --ihum:#D9AD5E;
+  --ihum-soft:#3A2F1B;
+  --econ:#6FBFA8;
+  --econ-soft:#1D332C;
+  --gci:#C99BCE;
+  --gci-soft:#332633;
+  --danger:#E38176;
+  --danger-soft:#3A2220;
+  --warn:#E2996A;
+  --warn-soft:#3A2818;
+  --ok:#7FBB9B;
+  --ok-soft:#1E332A;
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+}
+
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:'Public Sans', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{ max-width:920px; margin:0 auto; padding:28px 20px 80px; }
+
+header.top{ display:flex; flex-wrap:wrap; align-items:baseline; justify-content:space-between; gap:10px 20px; margin-bottom:22px;}
+header.top h1{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:2.2rem;
+  margin:0; letter-spacing:-0.01em; text-wrap:balance;
+}
+header.top .term{ color:var(--ink-soft); font-size:0.95rem; }
+.today-chip{
+  font-family:'IBM Plex Mono', monospace; font-size:0.78rem; color:var(--ink-soft);
+  background:var(--surface); border:1px solid var(--line); border-radius:999px;
+  padding:6px 12px; white-space:nowrap;
+}
+
+.courses{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;}
+@media (max-width:640px){ .courses{ grid-template-columns:1fr; } }
+.course-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px; box-shadow:var(--shadow);
+  border-top:3px solid var(--course-accent);
+}
+.course-card.arab{ --course-accent:var(--arab); }
+.course-card.ihum{ --course-accent:var(--ihum); }
+.course-card.econ{ --course-accent:var(--econ); }
+.course-card.gci{ --course-accent:var(--gci); }
+.course-card.tbd{ opacity:0.75; }
+.course-card .tag-waitlist{
+  font-family:'IBM Plex Mono', monospace; font-size:0.68rem; color:var(--warn);
+  background:var(--warn-soft); border-radius:6px; padding:2px 7px; display:inline-block; margin-bottom:8px; margin-left:6px;
+}
+.course-card h2{
+  font-family:'Fraunces', Georgia, serif; font-weight:600; font-size:1.15rem; margin:0 0 2px;
+}
+.course-card .meet{ font-size:0.85rem; color:var(--ink-soft); margin-bottom:10px; }
+.course-card .people{ font-size:0.78rem; color:var(--ink-faint); line-height:1.5; margin-bottom:12px;}
+.course-card .links{ display:flex; gap:8px; flex-wrap:wrap; }
+.course-card .links a{
+  font-size:0.76rem; font-weight:600; text-decoration:none; color:var(--course-accent);
+  border:1px solid var(--course-accent); border-radius:8px; padding:5px 10px;
+  transition:background 0.15s, color 0.15s;
+}
+.course-card .links a:hover{ background:var(--course-accent); color:var(--surface); }
+.grade-badge{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem; color:var(--ink-faint);
+  background:var(--surface-2); border-radius:6px; padding:2px 7px; display:inline-block; margin-bottom:10px;
+}
+
+.trial-note{
+  font-size:0.82rem; color:var(--warn); background:var(--warn-soft); border-radius:10px;
+  padding:8px 14px; margin-bottom:22px; display:flex; align-items:center; gap:8px;
+}
+
+.forward{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px 18px; margin-bottom:26px; box-shadow:var(--shadow);
+}
+.forward h3{
+  font-family:'Fraunces', Georgia, serif; font-size:1rem; font-weight:600; margin:0 0 12px;
+}
+.forward ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px; }
+.forward li{ display:flex; align-items:baseline; gap:10px; font-size:0.88rem; }
+.forward .fdate{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; color:var(--ink-faint); font-size:0.76rem; width:74px; flex:none; }
+.forward .fcourse{ font-size:0.68rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; flex:none; }
+.forward .fcourse.arab{ color:var(--arab); }
+.forward .fcourse.ihum{ color:var(--ihum); }
+.forward .ftitle{ color:var(--ink); }
+
+.controls{
+  display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;
+  margin-bottom:10px;
+}
+.controls .legend{ display:flex; gap:14px; font-size:0.75rem; color:var(--ink-faint); flex-wrap:wrap;}
+.legend .dot{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; vertical-align:middle;}
+.dot.overdue{ background:var(--danger); }
+.dot.soon{ background:var(--warn); }
+.dot.later{ background:var(--ink-faint); }
+.toggle-btn{
+  font-family:'Public Sans'; font-size:0.78rem; font-weight:600; color:var(--brand);
+  background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:6px 12px;
+  cursor:pointer;
+}
+.toggle-btn:hover{ background:var(--surface-2); }
+.toggle-btn:focus-visible, a:focus-visible, button:focus-visible{ outline:2px solid var(--brand); outline-offset:2px; }
+
+.week{ margin-bottom:10px; border:1px solid var(--line); border-radius:12px; overflow:hidden; background:var(--surface); box-shadow:var(--shadow);}
+.week-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:11px 16px; cursor:pointer; user-select:none; background:var(--surface);
+}
+.week-head:hover{ background:var(--surface-2); }
+.week-head .wtitle{ font-weight:600; font-size:0.88rem; }
+.week-head .wmeta{ font-size:0.74rem; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; }
+.week-head .chev{ transition:transform 0.15s; color:var(--ink-faint); font-size:0.8rem; }
+.week.open .chev{ transform:rotate(90deg); }
+.week-body{ display:none; border-top:1px solid var(--line); }
+.week.open .week-body{ display:block; }
+
+.item{
+  display:grid; grid-template-columns:64px 68px 1fr auto; align-items:center; gap:10px;
+  padding:9px 16px; border-top:1px solid var(--line); font-size:0.85rem;
+}
+.item:first-child{ border-top:none; }
+.item .stripe{ width:3px; align-self:stretch; border-radius:2px; margin-right:4px; }
+.item .idate{ font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums; color:var(--ink-soft); font-size:0.76rem; }
+.item .icourse{ font-size:0.65rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; padding:2px 6px; border-radius:5px; text-align:center; }
+.item .icourse.arab{ color:var(--arab); background:var(--arab-soft); }
+.item .icourse.ihum{ color:var(--ihum); background:var(--ihum-soft); }
+.item .ititle{ color:var(--ink); }
+.item .icat{ font-size:0.7rem; color:var(--ink-faint); white-space:nowrap; }
+.item.minor{ }
+.item.status-overdue .idate{ color:var(--danger); }
+.item.status-soon .idate{ color:var(--warn); }
+
+footer.note{ margin-top:26px; font-size:0.78rem; color:var(--ink-faint); line-height:1.6; }
+footer.note a{ color:var(--brand); }
+
+/* ---------------------------------------------------------------------------
+   Added when the board became scraper-fed. Everything above is the original
+   hand-built board, unchanged, so the existing look is preserved exactly.
+   --------------------------------------------------------------------------- */
+
+/* The original only ever needed ARAB and IHUM chips. Six more courses can
+   appear now, so the ECON and GCI bands get the same treatment. */
+.item .icourse.econ{ color:var(--econ); background:var(--econ-soft); }
+.item .icourse.gci{ color:var(--gci); background:var(--gci-soft); }
+.forward .fcourse.econ{ color:var(--econ); }
+.forward .fcourse.gci{ color:var(--gci); }
+
+/* Assignment rows carry a score now, so the grid gains a column. */
+.item{ grid-template-columns:64px 68px 1fr auto auto; }
+.item .iscore{
+  font-family:'IBM Plex Mono', monospace; font-variant-numeric:tabular-nums;
+  font-size:0.72rem; padding:2px 7px; border-radius:6px; white-space:nowrap;
+  background:var(--surface-2); color:var(--ink-soft);
+}
+.item .iscore.good{ background:var(--ok-soft); color:var(--ok); }
+.item .iscore.mid{ background:var(--warn-soft); color:var(--warn); }
+.item .iscore.low{ background:var(--danger-soft); color:var(--danger); }
+.item .iscore.ungraded{ opacity:0.45; }
+
+/* Course grade, replacing the "No grades posted yet" placeholder. */
+.grade-badge.has-grade{
+  background:var(--ok-soft); color:var(--ok); font-weight:600;
+}
+.grade-badge.pending{ opacity:0.8; }
+
+/* Readings that did not survive extraction as clean text. These will not work
+   in a voice walkthrough, and saying so is the whole point of the flag. */
+.flag-chip{
+  font-family:'IBM Plex Mono', monospace; font-size:0.62rem; letter-spacing:0.02em;
+  color:var(--warn); background:var(--warn-soft); border-radius:5px;
+  padding:2px 6px; white-space:nowrap; cursor:help;
+}
+.flag-chip.image-only{ color:var(--danger); background:var(--danger-soft); }
+
+.flags{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:16px 18px 18px; margin-bottom:26px; box-shadow:var(--shadow);
+}
+.flags h3{
+  font-family:'Fraunces', Georgia, serif; font-size:1rem; font-weight:600; margin:0 0 6px;
+}
+.flags .sub{ font-size:0.8rem; color:var(--ink-soft); margin-bottom:12px; }
+.flags ul{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+.flags li{ font-size:0.84rem; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; }
+.flags .fl-course{ font-size:0.66rem; font-weight:700; letter-spacing:0.03em; text-transform:uppercase; flex:none; }
+.flags .fl-why{ color:var(--ink-faint); font-size:0.78rem; width:100%; padding-left:2px; }
+
+/* Provenance line, so a stale board is obvious rather than quietly wrong. */
+.freshness{
+  font-family:'IBM Plex Mono', monospace; font-size:0.72rem;
+  color:var(--ink-faint); margin-bottom:18px;
+}
+.freshness.stale{ color:var(--warn); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Term Board</h1>
+      <div class="term">Fall 2026 &middot; 8 courses &middot; 2 live on Learning Suite</div>
+    </div>
+    <div class="today-chip" id="todayChip"></div>
+  </header>
+
+  <div class="freshness" id="freshness"></div>
+
+  <div class="courses">
+    <div class="course-card arab">
+      <h2>ARAB 201 &middot; 2nd-Year Arabic</h2>
+      <div class="meet">MWF 9:00&ndash;9:50 AM &middot; 270 MCKB<br>+ TTh 1:00&ndash;1:50 PM (2nd section)</div>
+      <div class="grade-badge pending">Grades in the widget</div>
+      <div class="people">Kirk Belnap &middot; Spencer Scoville<br>TA: Fida Zamamiri</div>
+      <div class="links"><a href="https://learningsuite.byu.edu/.NYCE/cid-5Ny6_0vtpMlw/student/gradebook" target="_blank" rel="noopener">Gradebook</a><a href="https://class.lingco.io/courses/159504" target="_blank" rel="noopener">Lingco</a></div>
+    </div>
+    <div class="course-card ihum">
+      <h2>IHUM 242 &middot; Islamic Humanities</h2>
+      <div class="meet">TTh 9:30&ndash;10:45 AM &middot; 3710 HBLL</div>
+      <div class="grade-badge pending">Grades in the widget</div>
+      <div class="people">Kevin Blankinship &middot; Robert Colson<br>TA: Luke Balicao</div>
+      <div class="links"><a href="https://learningsuite.byu.edu/.NYCE/cid-UeWtUUbc59pv/student/gradebook" target="_blank" rel="noopener">Gradebook</a></div>
+    </div>
+    <div class="course-card econ tbd">
+      <h2>ECON 378</h2>
+      <div class="meet">MW 2:00&ndash;3:15 PM</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Registered</div>
+      
+    </div>
+    <div class="course-card econ tbd">
+      <h2>ECON 380</h2>
+      <div class="meet">MWF 11:00&ndash;11:50 AM</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Assuming you clear the waitlist<span class="tag-waitlist">waitlist</span></div>
+      
+    </div>
+    <div class="course-card econ tbd">
+      <h2>ECON 381</h2>
+      <div class="meet">TTh 3:30&ndash;4:45 PM</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Assuming you clear the waitlist<span class="tag-waitlist">waitlist</span></div>
+      
+    </div>
+    <div class="course-card econ tbd">
+      <h2>ECON 210 &middot; Career Prep</h2>
+      <div class="meet">W 4:00&ndash;4:50 PM</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Registered</div>
+      
+    </div>
+    <div class="course-card gci tbd">
+      <h2>GCI 320 &middot; Implementing Social Impact</h2>
+      <div class="meet">Meeting time not listed &mdash; likely async/online</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Registered</div>
+      
+    </div>
+    <div class="course-card gci tbd">
+      <h2>GCI 330 &middot; Evaluating Social Impact</h2>
+      <div class="meet">TTh 2:00&ndash;3:15 PM</div>
+      <div class="grade-badge pending">Not on Learning Suite yet</div>
+      <div class="people">Registered</div>
+      
+    </div>
+  </div>
+
+  <div class="trial-note">&#9200; Lingco (Al-Kitaab Vol. 2) trial started Aug 29 &mdash; 14 days free, then $105&ndash;140 to keep access.</div>
+
+  <div class="forward">
+    <h3>Looking forward</h3>
+    <ul id="forwardList"></ul>
+  </div>
+
+  <div class="flags">
+    <h3>Reading extraction hasn't run yet</h3>
+    <div class="sub">These assignments came from the manual August pull. The scraper hasn't read their instructions or attachments yet, so nothing is marked conversation-ready and nothing is flagged. Both appear after the first morning run.</div>
+  </div>
+
+  <div class="controls">
+    <div class="legend">
+      <span><span class="dot overdue"></span>overdue</span>
+      <span><span class="dot soon"></span>due &le; 3 days</span>
+      <span><span class="dot later"></span>later</span>
+    </div>
+    <button class="toggle-btn" id="drillToggle">Show daily drills &amp; verb charts</button>
+  </div>
+
+  <div id="weeks"></div>
+
+  <footer class="note">
+    Seeded from the manual Learning Suite pull of 28&ndash;29 August, in the schema the scraper writes. Grades and reading flags fill in from the first automatic run. Courses whose instructors haven't published a syllabus yet show meeting times only. Full semester, including drills, also lives on your Google Calendar; this board is the curated view.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var SCRAPED_AT = "2026-08-30T14:02:10.690Z";
+  var items = [["ARAB 201","Quiz 13.1","2026-09-03T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 13.2","2026-09-09T08:00:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 13.3","2026-09-11T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz AK2 1.1","2026-09-18T12:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 1.2","2026-09-23T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 1.3","2026-09-30T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 2.1","2026-10-07T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 2.2","2026-10-09T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 3.1","2026-10-20T23:59:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 3.2","2026-10-23T13:00:00-06:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 4.1","2026-11-03T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 4.2","2026-11-06T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 4.3","2026-11-16T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 5.1","2026-11-18T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 5.2","2026-11-20T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","Quiz 5.3","2026-11-30T23:59:00-07:00","Vocab Quiz",0,null,null,0],["ARAB 201","13.6","2026-09-03T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","13.7","2026-09-09T08:00:00-06:00","AK Activity",1,null,null,0],["ARAB 201","13.12","2026-09-11T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","1.1","2026-09-21T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","1.7","2026-09-22T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","1.24","2026-09-28T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","Vocab Sentences","2026-10-07T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","2.13","2026-10-12T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","2.31","2026-10-16T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","3.17","2026-10-23T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","3.19","2026-10-23T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","3.14","2026-10-26T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","3.11","2026-10-27T23:59:00-06:00","AK Activity",1,null,null,0],["ARAB 201","4.8","2026-11-09T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Drill 2","2026-11-18T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Drill 15","2026-11-24T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Drill 22","2026-12-02T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Drill 21","2026-12-03T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Drill 24","2026-12-08T23:59:00-07:00","AK Activity",1,null,null,0],["ARAB 201","Verb Chart: Form II","2026-09-25T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form III","2026-09-28T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form IV","2026-09-29T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form V","2026-09-30T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form VI","2026-10-01T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form VII","2026-10-02T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form VIII","2026-10-06T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","Verb Chart: Form X","2026-10-07T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/9 Form III","2026-10-08T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/10 Form IV","2026-10-09T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/11 Form V","2026-10-12T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/14 Form VI","2026-10-13T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/15 Form VII","2026-10-14T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/16 Form VIII","2026-10-15T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/21 Form III","2026-10-20T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/18 Form X","2026-10-20T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/22 Form IV","2026-10-21T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/23 Form V","2026-10-22T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/24 Form VI","2026-10-23T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/25 Form VII","2026-10-26T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/28 Form VIII","2026-10-27T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","10/29 Form X","2026-10-28T23:59:00-06:00","Verb Chart",1,null,null,0],["ARAB 201","11/4 Form II","2026-11-03T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/5 Form III","2026-11-04T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/6 Form IV","2026-11-05T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/7 Form 1 (قضى)","2026-11-06T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/8 Form 1 (بقي)","2026-11-09T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/11 Form IV Hollow (أراد)","2026-11-10T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/12 Form VIII (انتهى)","2026-11-11T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/13 Form X (استطاع)","2026-11-12T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/14 Form II","2026-11-13T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/15 Form III","2026-11-16T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/18 Form IV","2026-11-17T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/19 Form V","2026-11-18T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/20 Form VI","2026-11-19T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/21 Form VII","2026-11-20T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/22 Form VIII","2026-11-23T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","11/25 Form X","2026-11-24T23:59:00-07:00","Verb Chart",1,null,null,0],["ARAB 201","Speaking Appointment 1","2026-09-15T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 2","2026-09-22T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 3","2026-09-28T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 4","2026-10-03T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 5","2026-10-10T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 6","2026-10-17T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 7","2026-10-24T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 8 (Midterm Oral)","2026-10-31T12:59:00-06:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 9","2026-11-07T12:59:00-07:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 10","2026-11-14T12:59:00-07:00","Speaking",0,null,null,0],["ARAB 201","Speaking Appointment 11 (Final Oral)","2026-12-02T12:59:00-07:00","Speaking",0,null,null,0],["ARAB 201","Chapter 13 Test","2026-09-30T23:59:00-06:00","Test",0,null,null,0],["ARAB 201","Chapter 1 Test","2026-10-05T23:59:00-06:00","Test",0,null,null,0],["ARAB 201","Chapter 2 Test","2026-10-20T23:59:00-06:00","Test",0,null,null,0],["ARAB 201","Chapter 4 Test","2026-11-16T23:59:00-07:00","Test",0,null,null,0],["ARAB 201","Midterm — Vocab","2026-11-06T23:59:00-07:00","Midterm",0,null,null,0],["ARAB 201","Midterm — Written","2026-11-10T23:59:00-07:00","Midterm",0,null,null,0],["ARAB 201","FINAL EXAM","2026-12-10T23:59:00-07:00","Final",0,null,null,0],["IHUM 242","Syllabus Quiz","2026-09-08T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 1","2026-09-10T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Map assignment","2026-09-10T23:59:00-06:00","Assignment",0,null,null,0],["IHUM 242","Kickoff Essay","2026-09-10T23:59:00-06:00","Essay",0,null,null,0],["IHUM 242","Readings Quiz 2","2026-09-15T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 3","2026-09-17T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 4","2026-09-22T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 5","2026-09-24T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 6","2026-09-29T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Short Paper 1: The Interview","2026-10-01T09:30:00-06:00","Paper",0,null,null,0],["IHUM 242","Readings Quiz 7","2026-10-08T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Essay on Dr. Shirinov's lecture","2026-10-08T23:59:00-06:00","Essay",0,null,null,0],["IHUM 242","Readings Quiz 8","2026-10-13T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Midterm Exam","2026-10-17T23:59:00-06:00","Midterm",0,null,null,0],["IHUM 242","Readings Quiz 9","2026-10-20T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 10","2026-10-22T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 11","2026-10-27T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 12","2026-10-29T09:30:00-06:00","Quiz",0,null,null,0],["IHUM 242","Short Paper 2: The Rebuttal","2026-11-03T09:30:00-07:00","Paper",0,null,null,0],["IHUM 242","Readings Quiz 13","2026-11-05T09:30:00-07:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 14","2026-11-10T09:30:00-07:00","Quiz",0,null,null,0],["IHUM 242","Readings Quiz 15","2026-11-12T09:30:00-07:00","Quiz",0,null,null,0],["IHUM 242","Short Paper 3: The Artist's Diary","2026-11-19T09:30:00-07:00","Paper",0,null,null,0],["IHUM 242","Readings Quiz 16","2026-11-17T09:30:00-07:00","Quiz",0,null,null,0],["IHUM 242","Final Presentation","2026-12-08T23:59:00-07:00","Presentation",0,null,null,0],["IHUM 242","Why Are You in College? Final Reflections Essay","2026-12-09T23:59:00-07:00","Essay",0,null,null,0],["IHUM 242","FINAL EXAM","2026-12-10T23:59:00-07:00","Final",0,null,null,0]].map(function(r){
+    return {
+      course:r[0], title:r[1], due:r[2] ? new Date(r[2]) : null, cat:r[3],
+      minor: !!r[4], score:r[5], possible:r[6], flagged: !!r[7]
+    };
+  });
+
+  function group(code){
+    var p = String(code).split(/\s+/)[0].toLowerCase();
+    return ['arab','ihum','econ','gci'].indexOf(p) >= 0 ? p : 'econ';
+  }
+  function shortCode(code){ return String(code).split(/\s+/)[0]; }
+
+  var now = new Date();
+  document.getElementById('todayChip').textContent =
+    now.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric', year:'numeric'});
+
+  var scraped = new Date(SCRAPED_AT);
+  var ageH = (now - scraped) / 36e5;
+  var fresh = document.getElementById('freshness');
+  var SEEDED = true;
+  fresh.textContent = (SEEDED ? 'Seeded ' : 'Last scrape: ') + scraped.toLocaleString(undefined,
+    {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}) +
+    (!SEEDED && ageH > 36 ? ' — more than a day old' : SEEDED ? ' — awaiting the first automatic run' : '');
+  if (!SEEDED && ageH > 36) fresh.classList.add('stale');
+
+  function status(d){
+    if (!d) return 'later';
+    var diffH = (d - now) / 36e5;
+    if (diffH < 0) return 'overdue';
+    if (diffH <= 72) return 'soon';
+    return 'later';
+  }
+  function fmtDate(d){
+    if (!d) return 'no due date';
+    return d.toLocaleDateString(undefined,{month:'short', day:'numeric'}) + ' ' +
+           d.toLocaleTimeString(undefined,{hour:'numeric', minute:'2-digit'});
+  }
+  function shortDate(d){ return d.toLocaleDateString(undefined,{month:'short', day:'numeric'}); }
+
+  function scoreCell(i){
+    if (i.score === null || i.score === undefined){
+      return '<span class="iscore ungraded">—</span>';
+    }
+    var text = i.possible ? (i.score + '/' + i.possible) : String(i.score);
+    var band = '';
+    if (i.possible){
+      var pct = i.score / i.possible;
+      band = pct >= 0.9 ? ' good' : pct >= 0.8 ? ' mid' : ' low';
+    }
+    return '<span class="iscore' + band + '">' + text + '</span>';
+  }
+
+  var forward = items.filter(function(i){ return !i.minor && i.due && i.due >= now; })
+    .sort(function(a,b){ return a.due - b.due; }).slice(0,5);
+  if (forward.length === 0){
+    forward = items.filter(function(i){ return !i.minor && i.due; })
+      .sort(function(a,b){ return a.due-b.due; }).slice(-5);
+  }
+  var fList = document.getElementById('forwardList');
+  forward.forEach(function(i){
+    var li = document.createElement('li');
+    li.innerHTML = '<span class="fdate">'+shortDate(i.due)+'</span>' +
+      '<span class="fcourse '+group(i.course)+'">'+shortCode(i.course)+'</span>' +
+      '<span class="ftitle">'+i.title+'</span>';
+    fList.appendChild(li);
+  });
+
+  function weekStart(d){
+    var wd = (d.getDay()+6)%7;
+    var s = new Date(d); s.setHours(0,0,0,0); s.setDate(s.getDate()-wd);
+    return s;
+  }
+  var groups = {};
+  var undated = [];
+  items.sort(function(a,b){
+    if (!a.due) return 1; if (!b.due) return -1; return a.due-b.due;
+  }).forEach(function(i){
+    if (!i.due){ undated.push(i); return; }
+    var ws = weekStart(i.due).getTime();
+    (groups[ws] = groups[ws] || []).push(i);
+  });
+  var weekKeys = Object.keys(groups).sort(function(a,b){ return a-b; });
+  var curWeek = weekStart(now).getTime();
+
+  var savedState = {};
+  try { savedState = JSON.parse(localStorage.getItem('termboard-weeks') || '{}'); } catch(e){ savedState = {}; }
+
+  var weeksEl = document.getElementById('weeks');
+
+  function renderRow(i){
+    var st = status(i.due);
+    var row = document.createElement('div');
+    row.className = 'item status-'+st + (i.minor ? ' minor' : '');
+    if (i.minor) row.style.display = 'none';
+    var stripeColor = st==='overdue' ? 'var(--danger)' : (st==='soon' ? 'var(--warn)' : 'var(--line)');
+    row.innerHTML =
+      '<span class="idate">'+fmtDate(i.due)+'</span>' +
+      '<span class="icourse '+group(i.course)+'">'+shortCode(i.course)+'</span>' +
+      '<span class="ititle" style="border-left:3px solid '+stripeColor+'; padding-left:8px;">'+i.title+
+        (i.flagged ? ' <span class="flag-chip" title="The reading behind this did not extract as clean text — it will not work well read aloud.">no clean text</span>' : '') +
+      '</span>' +
+      '<span class="icat">'+i.cat+'</span>' +
+      scoreCell(i);
+    return row;
+  }
+
+  weekKeys.forEach(function(wk){
+    var list = groups[wk];
+    var ws = new Date(parseInt(wk,10));
+    var we = new Date(ws); we.setDate(we.getDate()+6);
+    var isDefaultOpen = (parseInt(wk,10) >= curWeek - 7*86400000) && (parseInt(wk,10) <= curWeek + 14*86400000);
+    var openState = savedState.hasOwnProperty(wk) ? savedState[wk] : isDefaultOpen;
+
+    var weekEl = document.createElement('div');
+    weekEl.className = 'week' + (openState ? ' open' : '');
+    weekEl.dataset.wk = wk;
+
+    var majorCount = list.filter(function(i){ return !i.minor; }).length;
+    var minorCount = list.length - majorCount;
+
+    var head = document.createElement('div');
+    head.className = 'week-head';
+    head.innerHTML = '<span class="wtitle">'+shortDate(ws)+' – '+shortDate(we)+'</span>' +
+      '<span class="wmeta">'+majorCount+' item'+(majorCount===1?'':'s')+
+        (minorCount? ' + '+minorCount+' drill'+(minorCount===1?'':'s'):'')+'</span>' +
+      '<span class="chev">▸</span>';
+    head.addEventListener('click', function(){
+      weekEl.classList.toggle('open');
+      savedState[wk] = weekEl.classList.contains('open');
+      try { localStorage.setItem('termboard-weeks', JSON.stringify(savedState)); } catch(e){}
+    });
+
+    var body = document.createElement('div');
+    body.className = 'week-body';
+    list.forEach(function(i){ body.appendChild(renderRow(i)); });
+
+    weekEl.appendChild(head);
+    weekEl.appendChild(body);
+    weeksEl.appendChild(weekEl);
+  });
+
+  if (undated.length){
+    var weekEl = document.createElement('div');
+    weekEl.className = 'week';
+    var head = document.createElement('div');
+    head.className = 'week-head';
+    head.innerHTML = '<span class="wtitle">No due date</span>' +
+      '<span class="wmeta">'+undated.length+' item'+(undated.length===1?'':'s')+'</span>' +
+      '<span class="chev">▸</span>';
+    head.addEventListener('click', function(){ weekEl.classList.toggle('open'); });
+    var body = document.createElement('div');
+    body.className = 'week-body';
+    undated.forEach(function(i){ body.appendChild(renderRow(i)); });
+    weekEl.appendChild(head); weekEl.appendChild(body);
+    weeksEl.appendChild(weekEl);
+  }
+
+  var showingMinor = false;
+  document.getElementById('drillToggle').addEventListener('click', function(){
+    showingMinor = !showingMinor;
+    document.querySelectorAll('.item.minor').forEach(function(el){
+      el.style.display = showingMinor ? 'grid' : 'none';
+    });
+    this.textContent = showingMinor ? 'Hide daily drills & verb charts' : 'Show daily drills & verb charts';
+  });
+})();
+</script>
+</body>
+</html>
