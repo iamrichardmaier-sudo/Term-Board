@@ -40,7 +40,7 @@
  * every run, so "which version is actually on the phone?" is answerable in two
  * seconds instead of by reading a diff.
  */
-const VERSION = "2026-08-31a";
+const VERSION = "2026-08-31b";
 
 const REPO = "iamrichardmaier-sudo/Term-Board";
 
@@ -332,6 +332,25 @@ function upcoming(data, limit) {
 
 // ---------------------------------------------------------------- widget
 
+/**
+ * One spec per widget size, rather than one design scaled down.
+ *
+ * The sizes are not the same shape: large has room for a labelled grades block
+ * above a labelled list, medium has room for the list plus grades tucked into
+ * the header, and small has room for the list alone. Sizing a single layout
+ * down overflows medium — iOS silently clips whatever does not fit, so the
+ * bottom rows and the footer just vanish.
+ *
+ * grades: "block"  a labelled section, one course per line
+ *         "inline" compact chips on the title row
+ *         "none"   omitted; there is no room and the list matters more
+ */
+const LAYOUT = {
+  small:  { pad: 10, title: 12, chip: 8,  row: 10, due: 9,  gap: 2, rows: 4, grades: "none",   labels: false, footer: 8 },
+  medium: { pad: 11, title: 13, chip: 9,  row: 11, due: 10, gap: 2, rows: 6, grades: "inline", labels: false, footer: 8 },
+  large:  { pad: 14, title: 16, chip: 11, row: 13, due: 12, gap: 4, rows: 7, grades: "block",  labels: true,  footer: 10 },
+};
+
 function sectionHeader(w, text, trailing) {
   const stack = w.addStack();
   stack.centerAlignContent();
@@ -348,60 +367,83 @@ function sectionHeader(w, text, trailing) {
 }
 
 function buildWidget(data, note) {
+  const family = config.widgetFamily || "large";
+  const L = LAYOUT[family] || LAYOUT.large;
+
   const w = new ListWidget();
-  w.setPadding(14, 14, 14, 14);
+  w.setPadding(L.pad, L.pad, L.pad, L.pad);
   w.backgroundColor = new Color(BG);
   // The feed names its own tap target, so this follows the board wherever it
   // actually lives without needing the script re-pasted.
   w.url = (data && data.boardUrl) || BOARD_URL;
 
-  const family = config.widgetFamily || "large";
-  const small = family === "small";
-
   const head = w.addStack();
   head.centerAlignContent();
   const title = head.addText("Term Board");
-  title.font = Font.boldSystemFont(small ? 13 : 16);
+  title.font = Font.boldSystemFont(L.title);
   title.textColor = new Color(INK);
   head.addSpacer();
-  if (data && data.term && !small) {
-    const term = head.addText(data.term);
-    term.font = Font.systemFont(10);
-    term.textColor = new Color(FAINT);
-  }
-
-  w.addSpacer(small ? 4 : 8);
 
   if (!data) {
+    w.addSpacer(6);
     const msg = w.addText(note || "Couldn't reach the board.");
-    msg.font = Font.systemFont(12);
+    msg.font = Font.systemFont(L.row);
     msg.textColor = new Color(MUTED);
     return w;
   }
 
-  // ---- Grades ----
-  if (!small) {
+  const grades = data.grades || [];
+
+  // Medium puts grades on the title row: it buys back roughly fifty points of
+  // height, which is two more assignments in the list underneath.
+  if (L.grades === "inline") {
+    if (grades.length) {
+      for (const g of grades.slice(0, 3)) {
+        const cell = head.addStack();
+        cell.spacing = 3;
+        cell.centerAlignContent();
+        const code = cell.addText(shortCode(g.course));
+        code.font = Font.mediumSystemFont(L.chip);
+        code.textColor = courseColor(g.course);
+        const pct = cell.addText(String(Math.round(g.percent)));
+        pct.font = Font.boldSystemFont(L.chip);
+        pct.textColor = gradeColor(g.percent);
+        head.addSpacer(7);
+      }
+    } else {
+      const none = head.addText(data.signedIn ? "no grades yet" : "sign in for grades");
+      none.font = Font.systemFont(L.chip);
+      none.textColor = new Color(FAINT);
+    }
+  } else if (data.term) {
+    const term = head.addText(data.term);
+    term.font = Font.systemFont(L.chip);
+    term.textColor = new Color(FAINT);
+  }
+
+  w.addSpacer(L.grades === "block" ? 8 : 6);
+
+  // Large keeps the labelled grades block — it has the room, and one course per
+  // line is easier to read than a row of chips.
+  if (L.grades === "block") {
     sectionHeader(w, "GRADES");
-    const grades = data.grades || [];
     if (grades.length === 0) {
       const none = w.addText(
-        data.gradesArePrivate && !data.signedIn
-          ? "Open the app and sign in to see grades."
-          : "No grades posted yet.",
+        data.signedIn ? "No grades posted yet." : "Open the app and sign in to see grades.",
       );
-      none.font = Font.systemFont(12);
+      none.font = Font.systemFont(L.row - 1);
       none.textColor = new Color(MUTED);
       w.addSpacer(2);
     } else {
-      for (const g of grades.slice(0, family === "large" ? 4 : 2)) {
+      for (const g of grades.slice(0, 4)) {
         const row = w.addStack();
         row.centerAlignContent();
         const name = row.addText(g.course);
-        name.font = Font.systemFont(13);
+        name.font = Font.systemFont(L.row);
         name.textColor = courseColor(g.course);
         row.addSpacer();
         const score = row.addText(g.grade);
-        score.font = Font.boldSystemFont(13);
+        score.font = Font.boldSystemFont(L.row);
         score.textColor = gradeColor(g.percent);
         w.addSpacer(3);
       }
@@ -409,16 +451,16 @@ function buildWidget(data, note) {
     w.addSpacer(9);
   }
 
-  // ---- Due ----
   const late = overdue(data);
-  const rows = small ? 3 : family === "medium" ? 4 : 6;
-  const list = [...late, ...upcoming(data, rows)].slice(0, rows);
+  const list = [...late, ...upcoming(data, L.rows)].slice(0, L.rows);
 
-  sectionHeader(w, "DUE SOON", late.length ? `${late.length} overdue` : null);
+  if (L.labels) {
+    sectionHeader(w, "DUE SOON", late.length ? `${late.length} overdue` : null);
+  }
 
   if (list.length === 0) {
     const none = w.addText("Nothing left on the board.");
-    none.font = Font.systemFont(12);
+    none.font = Font.systemFont(L.row);
     none.textColor = new Color(MUTED);
   } else {
     for (const a of list) {
@@ -427,44 +469,53 @@ function buildWidget(data, note) {
       row.spacing = 5;
 
       const chip = row.addText(shortCode(a.course));
-      chip.font = Font.mediumSystemFont(11);
+      chip.font = Font.mediumSystemFont(L.chip);
       chip.textColor = courseColor(a.course);
+      chip.lineLimit = 1;
 
       const label = row.addText(a.title);
-      label.font = Font.systemFont(13);
+      label.font = Font.systemFont(L.row);
       label.textColor = new Color(INK);
       label.lineLimit = 1;
+      // Without this the title pushes the due date off the right edge on the
+      // narrower sizes; the date is the part you cannot afford to lose.
+      label.minimumScaleFactor = 0.9;
 
       row.addSpacer();
 
       if (!a.conversationReady && a.textQuality && a.textQuality !== "unknown") {
-        const flag = row.addText("⚑");
-        flag.font = Font.systemFont(10);
+        const flag = row.addText("\u2691");
+        flag.font = Font.systemFont(L.due - 2);
         flag.textColor = new Color(WARN);
       }
 
       const due = row.addText(formatDue(a.due));
-      due.font = Font.systemFont(12);
+      due.font = Font.systemFont(L.due);
       due.textColor = new Color(dueColor(a.due));
+      due.lineLimit = 1;
 
-      w.addSpacer(4);
+      w.addSpacer(L.gap);
     }
   }
 
   w.addSpacer();
-  const footer = w.addText(footerText(data));
-  footer.font = Font.systemFont(10);
+  const footer = w.addText(footerText(data, late.length, !L.labels));
+  footer.font = Font.systemFont(L.footer);
   footer.textColor = new Color(FAINT);
+  footer.lineLimit = 1;
 
   return w;
 }
 
-function footerText(data) {
-  if (!data.generatedAt) return "Tap for full board";
+function footerText(data, lateCount, carryOverdue) {
+  // On the sizes with no "DUE SOON · n overdue" label, the count has nowhere
+  // else to go, so it leads the footer.
+  const prefix = carryOverdue && lateCount ? `${lateCount} overdue · ` : "";
+  if (!data.generatedAt) return prefix + "Tap for full board";
   const age = (new Date() - new Date(data.generatedAt)) / 36e5;
-  if (data.seeded) return "Seeded — awaiting first scrape";
-  if (age > 36) return `Stale — last scrape ${Math.round(age / 24)}d ago`;
-  return "Tap for full board";
+  if (data.seeded) return prefix + "Seeded — awaiting first scrape";
+  if (age > 36) return prefix + `Stale — ${Math.round(age / 24)}d ago`;
+  return prefix + "Tap for full board";
 }
 
 // ------------------------------------------------------------ in-app UI

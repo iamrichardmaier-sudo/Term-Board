@@ -88,6 +88,7 @@ powershell -ExecutionPolicy Bypass -File windows\install-task.ps1
 | `npm run doctor` | Checks the setup without touching Learning Suite. |
 | `node test/smoke.mjs` | Tests the date parsing, payload building and rendering. |
 | `node test/widget-logic.mjs` | Tests the widget's date bucketing and grade merge. |
+| `node test/widget-fit.mjs` | Estimates rendered height per widget size and fails on overflow. |
 
 ## The selectors need one calibration pass
 
