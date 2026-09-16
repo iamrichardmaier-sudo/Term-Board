@@ -1,0 +1,1745 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Read Aloud</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------------------------------------------------------------- tokens
+   Same accents as the Term Board so the reader and the board read as one
+   system, dropped onto a darker ground because this one is meant to be held
+   at night with the screen dimmed. */
+:root{
+  --bg:#0B0D14;
+  --surface:#161A26;
+  --surface-2:#1E2432;
+  --line:#2A3142;
+  --ink:#EDEEF2;
+  --ink-soft:#A7ADBD;
+  --ink-faint:#6B7286;
+  --brand:#8C9EDB;
+  --gold:#D9AD5E;
+  --teal:#6FBFA8;
+  --plum:#C99BCE;
+  --danger:#E38176;
+  --radius:18px;
+  --bar: calc(72px + env(safe-area-inset-bottom));
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Public Sans',ui-sans-serif,system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+
+/* The aurora. Two blurred blobs drifting behind everything, so a page of
+   plain text still feels like it is playing something. They pause outright
+   when nothing is speaking — an animation running under a locked screen for
+   forty minutes is a battery bill for no one's benefit. */
+.aurora{position:fixed;inset:-25%;z-index:0;pointer-events:none;filter:blur(70px);opacity:.5;transition:opacity .8s ease;}
+.aurora i{position:absolute;display:block;border-radius:50%;mix-blend-mode:screen;}
+.aurora i:nth-child(1){width:60vmax;height:60vmax;left:-10vmax;top:-10vmax;background:radial-gradient(circle,#3B4B8F,transparent 65%);animation:drift1 26s ease-in-out infinite;}
+.aurora i:nth-child(2){width:50vmax;height:50vmax;right:-12vmax;bottom:-8vmax;background:radial-gradient(circle,#2E6E63,transparent 65%);animation:drift2 34s ease-in-out infinite;}
+.aurora i:nth-child(3){width:38vmax;height:38vmax;left:30vw;bottom:10vh;background:radial-gradient(circle,#6B4E7A,transparent 65%);animation:drift1 41s ease-in-out infinite reverse;}
+body:not(.speaking) .aurora i{animation-play-state:paused;}
+body:not(.speaking) .aurora{opacity:.28;}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(12vw,8vh) scale(1.18);}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1.1);}50%{transform:translate(-14vw,-6vh) scale(.9);}}
+@media (prefers-reduced-motion:reduce){.aurora i{animation:none!important;}}
+
+.wrap{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px var(--bar);}
+
+/* ------------------------------------------------------------------ head */
+header.top{display:flex;align-items:center;gap:10px;padding:6px 2px 16px;}
+.mark{width:34px;height:34px;border-radius:11px;flex:0 0 auto;display:grid;place-items:center;
+  background:linear-gradient(145deg,#4356A8,#2B7F6E);box-shadow:0 0 0 1px #ffffff14,0 8px 22px -10px #4356A8;}
+.mark svg{width:18px;height:18px;}
+header.top h1{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:19px;margin:0;letter-spacing:.2px;}
+header.top .sub{font-size:11px;color:var(--ink-faint);font-family:'IBM Plex Mono',ui-monospace,monospace;}
+.spacer{flex:1;}
+.icon-btn{appearance:none;border:1px solid var(--line);background:#ffffff08;color:var(--ink-soft);
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:15px;cursor:pointer;}
+.icon-btn:active{transform:scale(.94);}
+
+/* ------------------------------------------------------------- drop zone */
+.drop{
+  border:1.5px dashed #ffffff22;border-radius:22px;padding:34px 20px;text-align:center;
+  background:linear-gradient(180deg,#ffffff0a,#ffffff03);transition:border-color .2s,background .2s,transform .2s;
+}
+.drop.hot{border-color:var(--brand);background:#8C9EDB18;transform:scale(1.01);}
+.drop h2{font-family:'Fraunces',Georgia,serif;font-weight:600;font-size:22px;margin:14px 0 6px;}
+.drop p{color:var(--ink-soft);font-size:13.5px;line-height:1.55;margin:0 auto;max-width:34em;}
+.drop .glyph{font-size:34px;line-height:1;filter:drop-shadow(0 6px 18px #8C9EDB55);}
+.cta{
+  appearance:none;border:0;cursor:pointer;margin-top:20px;
+  font:600 15px/1 'Public Sans',system-ui,sans-serif;color:#0B0D14;
+  padding:14px 26px;border-radius:999px;
+  background:linear-gradient(135deg,#A9B6EA,#7FD2BC);
+  box-shadow:0 10px 30px -12px #8C9EDBaa;
+}
+.cta:active{transform:scale(.97);}
+.hint{margin-top:14px;font-size:11.5px;color:var(--ink-faint);font-family:'IBM Plex Mono',monospace;}
+
+/* ------------------------------------------------------------- progress */
+.stage{display:none;}
+.stage.on{display:block;}
+.work{border:1px solid var(--line);border-radius:var(--radius);background:#ffffff07;padding:18px;}
+.work h3{margin:0 0 4px;font-size:15px;font-weight:600;}
+.work .detail{font-size:12.5px;color:var(--ink-soft);min-height:1.4em;}
+.meter{height:6px;border-radius:99px;background:#ffffff12;overflow:hidden;margin:14px 0 4px;}
+.meter i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--teal));transition:width .25s ease;}
+.pagemap{display:flex;flex-wrap:wrap;gap:3px;margin-top:12px;}
+.pagemap b{width:9px;height:9px;border-radius:3px;background:#ffffff14;transition:background .3s;}
+.pagemap b.text{background:var(--teal);}
+.pagemap b.ocr{background:var(--gold);}
+.pagemap b.busy{background:var(--brand);animation:blink .9s infinite;}
+.pagemap b.empty{background:#ffffff14;}
+@keyframes blink{50%{opacity:.25;}}
+
+/* ----------------------------------------------------------------- docs */
+.doccard{border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(180deg,#ffffff0c,#ffffff04);padding:16px 16px 14px;margin-bottom:14px;}
+.doccard h2{font-family:'Fraunces',Georgia,serif;font-size:19px;font-weight:600;margin:0 0 8px;line-height:1.25;word-break:break-word;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;}
+.pill{font:500 11px/1 'IBM Plex Mono',monospace;padding:6px 9px;border-radius:999px;background:#ffffff10;color:var(--ink-soft);border:1px solid #ffffff10;}
+.pill.ok{color:var(--teal);border-color:#6FBFA840;background:#6FBFA815;}
+.pill.ocr{color:var(--gold);border-color:#D9AD5E40;background:#D9AD5E15;}
+.pill.warn{color:var(--danger);border-color:#E3817640;background:#E3817615;}
+
+/* ----------------------------------------------------------------- text */
+#reader{font-size:19px;line-height:1.72;letter-spacing:.005em;}
+#reader p{margin:0 0 1.15em;color:var(--ink-soft);}
+#reader .pagebreak{display:flex;align-items:center;gap:10px;margin:26px 0 20px;color:var(--ink-faint);
+  font:500 10.5px/1 'IBM Plex Mono',monospace;letter-spacing:.14em;text-transform:uppercase;}
+#reader .pagebreak::before,#reader .pagebreak::after{content:"";height:1px;flex:1;background:var(--line);}
+#reader .pagebreak.scan{color:var(--gold);}
+#reader s-t{display:inline;border-radius:6px;padding:1px 0;transition:color .25s,background .25s;cursor:pointer;}
+#reader s-t.done{color:var(--ink-faint);}
+#reader s-t.now{
+  color:#fff;background:linear-gradient(180deg,#8C9EDB2e,#8C9EDB1a);
+  box-shadow:0 0 0 4px #8C9EDB1a;
+}
+
+/* -------------------------------------------------------------- control */
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:5;
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+  background:#0B0D14e0;backdrop-filter:blur(18px) saturate(160%);-webkit-backdrop-filter:blur(18px) saturate(160%);
+  border-top:1px solid var(--line);
+  display:none;
+}
+.bar.on{display:block;}
+.track{height:4px;border-radius:99px;background:#ffffff12;overflow:hidden;margin-bottom:10px;cursor:pointer;}
+.track i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),var(--teal));width:0;transition:width .2s linear;}
+.row{display:flex;align-items:center;gap:8px;}
+.ctl{appearance:none;border:1px solid var(--line);background:#ffffff08;color:var(--ink);
+  height:44px;min-width:44px;padding:0 12px;border-radius:14px;font:600 13px/1 'Public Sans',sans-serif;cursor:pointer;}
+.ctl:active{transform:scale(.95);}
+.ctl[disabled]{opacity:.35;}
+.play{
+  height:56px;width:56px;border-radius:50%;border:0;display:grid;place-items:center;color:#0B0D14;
+  background:linear-gradient(135deg,#A9B6EA,#7FD2BC);box-shadow:0 8px 26px -10px #8C9EDBcc;font-size:20px;
+}
+body.speaking .play{animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 8px 26px -10px #8C9EDBcc,0 0 0 0 #8C9EDB55;}50%{box-shadow:0 8px 26px -10px #8C9EDBcc,0 0 0 12px #8C9EDB00;}}
+.wave{display:flex;align-items:center;gap:2.5px;height:22px;padding:0 4px;}
+.wave b{width:2.5px;border-radius:99px;background:var(--brand);height:4px;opacity:.5;}
+body.speaking .wave b{animation:bounce 1s ease-in-out infinite;opacity:1;}
+.wave b:nth-child(2){animation-delay:.12s}.wave b:nth-child(3){animation-delay:.24s}
+.wave b:nth-child(4){animation-delay:.36s}.wave b:nth-child(5){animation-delay:.18s}
+@keyframes bounce{0%,100%{height:4px;}50%{height:18px;}}
+.now-meta{flex:1;min-width:0;font:500 11px/1.35 'IBM Plex Mono',monospace;color:var(--ink-faint);}
+.now-meta span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ---------------------------------------------------------------- sheet */
+.sheet{position:fixed;inset:0;z-index:20;display:none;}
+.sheet.on{display:block;}
+.sheet .scrim{position:absolute;inset:0;background:#000000a8;backdrop-filter:blur(3px);}
+.sheet .panel{
+  position:absolute;left:0;right:0;bottom:0;max-height:88vh;overflow:auto;
+  background:var(--surface);border-radius:22px 22px 0 0;border-top:1px solid var(--line);
+  padding:18px 18px calc(24px + env(safe-area-inset-bottom));
+  animation:rise .28s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes rise{from{transform:translateY(18px);opacity:.4;}}
+.sheet h3{font-family:'Fraunces',Georgia,serif;font-size:18px;margin:0 0 4px;}
+.sheet .note{font-size:12.5px;color:var(--ink-faint);line-height:1.5;margin:0 0 16px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font:600 11px/1 'IBM Plex Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:6px;}
+.field input,.field select{
+  width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--line);
+  background:#ffffff08;color:var(--ink);font:400 15px/1 'Public Sans',sans-serif;
+}
+.field input:focus,.field select:focus{outline:none;border-color:var(--brand);}
+.seg{display:flex;gap:6px;}
+.seg button{flex:1;height:42px;border-radius:12px;border:1px solid var(--line);background:#ffffff08;
+  color:var(--ink-soft);font:600 13px/1 'Public Sans',sans-serif;cursor:pointer;}
+.seg button.sel{background:#8C9EDB22;border-color:var(--brand);color:#fff;}
+.toast{position:fixed;left:50%;bottom:calc(var(--bar) + 12px);transform:translateX(-50%);z-index:30;
+  background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:11px 16px;
+  font-size:13px;max-width:88vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.toast.on{opacity:1;}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<div class="wrap">
+  <header class="top">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round">
+        <path d="M11 5 6 9H3v6h3l5 4V5z" fill="#fff" stroke-linejoin="round"/>
+        <path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Read Aloud</h1>
+      <div class="sub" id="version">term board · reader</div>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btn-lib" title="Recent documents" aria-label="Recent documents">◷</button>
+    <button class="icon-btn" id="btn-settings" title="Voice settings" aria-label="Voice settings">⚙</button>
+  </header>
+
+  <!-- ------------------------------------------------------------ pick -->
+  <section id="pick">
+    <div class="drop" id="drop">
+      <div class="glyph">📄</div>
+      <h2>Drop a PDF in</h2>
+      <p>Born-digital or scanned. Pages with no text layer get run through OCR
+         on the spot, then the whole thing is read to you out loud.</p>
+      <button class="cta" id="btn-pick">Choose a PDF</button>
+      <div class="hint" id="pickhint">or share one to this page from anywhere</div>
+      <input type="file" id="file" accept="application/pdf,.pdf" multiple hidden>
+    </div>
+  </section>
+
+  <!-- --------------------------------------------------------- working -->
+  <section id="working" class="stage">
+    <div class="work">
+      <h3 id="work-title">Opening…</h3>
+      <div class="detail" id="work-detail"></div>
+      <div class="meter"><i id="work-meter"></i></div>
+      <div class="pagemap" id="pagemap"></div>
+    </div>
+  </section>
+
+  <!-- ---------------------------------------------------------- reading -->
+  <section id="doc" class="stage">
+    <div class="doccard">
+      <h2 id="doc-title">—</h2>
+      <div class="pills" id="doc-pills"></div>
+    </div>
+    <div id="reader"></div>
+  </section>
+</div>
+
+<!-- ----------------------------------------------------------- controls -->
+<div class="bar" id="bar">
+  <div class="track" id="track"><i id="track-fill"></i></div>
+  <div class="row">
+    <button class="ctl" id="btn-back" aria-label="Previous sentence">◀◀</button>
+    <button class="ctl play" id="btn-play" aria-label="Play">▶</button>
+    <button class="ctl" id="btn-fwd" aria-label="Next sentence">▶▶</button>
+    <div class="wave" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></div>
+    <div class="now-meta"><span id="meta-1">—</span><span id="meta-2"></span></div>
+    <button class="ctl" id="btn-rate">1.0×</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ------------------------------------------------------------- sheets -->
+<div class="sheet" id="sheet-settings">
+  <div class="scrim" data-close></div>
+  <div class="panel">
+    <h3>Voice</h3>
+    <p class="note">Device voices are free, offline and instant. Cloud voices sound
+       like a person and cost a fraction of a cent a page.</p>
+
+    <div class="field">
+      <label>Engine</label>
+      <div class="seg" id="seg-engine">
+        <button data-engine="device">Device</button>
+        <button data-engine="elevenlabs">ElevenLabs</button>
+        <button data-engine="openai">OpenAI</button>
+      </div>
+    </div>
+
+    <div class="field" id="f-devicevoice">
+      <label>Device voice</label>
+      <select id="sel-voice"></select>
+    </div>
+
+    <div class="field" id="f-key" hidden>
+      <label>API key</label>
+      <input id="in-key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="paste key">
+    </div>
+    <div class="field" id="f-voiceid" hidden>
+      <label id="lab-voiceid">Voice</label>
+      <input id="in-voiceid" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <div class="field" id="f-model" hidden>
+      <label>Model</label>
+      <input id="in-model" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+    <p class="note" id="key-note" hidden></p>
+
+    <div class="field">
+      <label>OCR language</label>
+      <input id="in-lang" value="eng" autocomplete="off" autocapitalize="off" spellcheck="false">
+    </div>
+
+    <button class="cta" style="width:100%" data-close>Done</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet-lib">
+  <div class="scrim" data-close></div>
+  <div class="panel">
+    <h3>Recent</h3>
+    <p class="note">Extracted text is kept on this device so reopening a PDF is
+       instant and picks up where you stopped.</p>
+    <div id="lib-list"></div>
+    <button class="ctl" style="width:100%;margin-top:8px" id="btn-clearlib">Forget all</button>
+    <button class="cta" style="width:100%;margin-top:8px" data-close>Close</button>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   PIPELINE START
+   Everything between these two markers is pure: strings in, strings out,
+   no DOM and no network. test/reader.mjs slices this block out of the file
+   and runs it under node, which is why the markers are load-bearing — do
+   not rename them.
+   ===================================================================== */
+
+/** Under this many characters a page is treated as a picture of text. Same
+ *  threshold the scraper uses (src/config.js), so the widget's ⚑ and the
+ *  reader's OCR decision are the same judgement call. */
+const MIN_CHARS_PER_PAGE = 120;
+
+/**
+ * pdf.js text items -> lines.
+ *
+ * The items arrive in draw order with no notion of a line; `hasEOL` is the
+ * only signal for where one ended. Keeping the line breaks matters because
+ * everything downstream — de-hyphenation, running headers, paragraph
+ * detection — is inferred from them. Joining on spaces, as the scraper does,
+ * throws that away.
+ */
+function itemsToLines(items) {
+  const lines = [];
+  let buf = "";
+  for (const it of items) {
+    if (typeof it.str !== "string") continue;
+    buf += it.str;
+    if (it.hasEOL) { lines.push(buf); buf = ""; }
+  }
+  if (buf) lines.push(buf);
+  return lines.map((l) => l.replace(/\s+/g, " ").trim());
+}
+
+/** Ligatures and smart punctuation that synthesisers mispronounce or skip. */
+function normalizeGlyphs(s) {
+  return s
+    .replace(/ﬁ/g, "fi").replace(/ﬂ/g, "fl")
+    .replace(/ﬀ/g, "ff").replace(/ﬃ/g, "ffi").replace(/ﬄ/g, "ffl")
+    .replace(/[‘’‛]/g, "'")
+    .replace(/[“”]/g, '"')
+    .replace(/­/g, "")           // soft hyphen
+    .replace(/[‐‑]/g, "-")
+    .replace(/ /g, " ");
+}
+
+/** "3", "— 12 —", "Page 4 of 9", "iv" — a line that is only a page number. */
+function looksLikePageNumber(line) {
+  const s = line.replace(/[\s—–\-|.\[\]()]/g, "");
+  if (!s) return true;
+  if (/^\d{1,4}$/.test(s)) return true;
+  if (/^page\d{1,4}(of\d{1,4})?$/i.test(s)) return true;
+  if (/^[ivxlcdm]{1,7}$/i.test(s) && s.length <= 7) return true;
+  return false;
+}
+
+/**
+ * Drops the running header and footer.
+ *
+ * A header repeats verbatim on most pages, so the test is simply: does this
+ * first (or last) line show up in the same position on well over half the
+ * pages? Two pages is not enough evidence for that — a two-page handout whose
+ * pages happen to open alike would lose a real line — so short documents are
+ * left alone. Digits are masked before comparing so "Chapter 3, page 7" and
+ * "Chapter 3, page 8" count as the same line.
+ */
+function stripRunningLines(pages) {
+  if (pages.length < 4) return pages;
+
+  const mask = (s) => s.replace(/\d+/g, "#").toLowerCase().trim();
+  const tally = (pick) => {
+    const counts = new Map();
+    for (const lines of pages) {
+      const line = pick(lines);
+      if (!line) continue;
+      const k = mask(line);
+      if (k.length < 3 || k.length > 90) continue;
+      counts.set(k, (counts.get(k) || 0) + 1);
+    }
+    const out = new Set();
+    for (const [k, n] of counts) if (n >= pages.length * 0.6) out.add(k);
+    return out;
+  };
+
+  const heads = tally((l) => l[0]);
+  const feet = tally((l) => l[l.length - 1]);
+
+  return pages.map((lines) => {
+    let a = 0;
+    let b = lines.length;
+    if (b > a && heads.has(mask(lines[a]))) a++;
+    if (b > a && feet.has(mask(lines[b - 1]))) b--;
+    return lines.slice(a, b);
+  });
+}
+
+/**
+ * Lines -> paragraphs.
+ *
+ * PDFs wrap at the column edge, not at the end of a thought, so every line
+ * break has to be classified as either "the paragraph continues" or "a new
+ * one starts". A trailing hyphen means a word was split across the wrap and
+ * the two halves are glued back together; a line that just ran out of room
+ * gets a space; anything that ends cleanly and is followed by something that
+ * starts like a new sentence gets a real break.
+ */
+function linesToParagraphs(lines) {
+  const paras = [];
+  let cur = "";
+
+  const flush = () => { const t = cur.trim(); if (t) paras.push(t); cur = ""; };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) { flush(); continue; }
+    if (looksLikePageNumber(line)) { flush(); continue; }
+
+    if (!cur) { cur = line; continue; }
+
+    if (/[A-Za-z؀-ۿ]-$/.test(cur)) {
+      // Wrapped mid-word: drop the hyphen unless the next piece is capitalised,
+      // which usually means a real compound (a genuine "Anglo-" + "Saxon").
+      cur = /^[A-Z]/.test(line) ? cur + line : cur.slice(0, -1) + line;
+      continue;
+    }
+
+    const endsSentence = /[.!?…:;"')\]]$/.test(cur);
+    const startsNew = /^["'(\[]?[A-Z0-9•]/.test(line);
+    const isBullet = /^[•·●*\-–—]\s/.test(line) || /^\(?\d{1,2}[.)]\s/.test(line);
+
+    // A short line carrying no punctuation at all, with a capital underneath
+    // it, is a title or a running header — not the first half of a wrapped
+    // sentence. Without this it gets glued to the opening line of the body and
+    // read out as part of it, which is the clearest tell that a page was
+    // scraped rather than read.
+    const isHeading = cur.length < 60 && !/[.!?…,;:]/.test(cur) && !cur.endsWith("-");
+
+    if (isBullet || ((endsSentence || isHeading) && startsNew && cur.length > 2)) { flush(); cur = line; }
+    else cur += " " + line;
+  }
+  flush();
+  return paras;
+}
+
+/** How much real text a page gave up, and therefore whether OCR is needed. */
+function judgePage(text) {
+  const n = (text || "").replace(/\s/g, "").length;
+  if (n < 20) return "empty";
+  if (n < MIN_CHARS_PER_PAGE) return "thin";
+  return "text";
+}
+
+const ABBREVIATIONS = new Set([
+  "mr", "mrs", "ms", "dr", "prof", "st", "jr", "sr", "vs", "etc", "eg", "ie",
+  "fig", "figs", "no", "nos", "vol", "vols", "pp", "ch", "chs", "al", "ibid",
+  "cf", "approx", "dept", "univ", "ed", "eds", "trans", "esp", "inc", "ltd", "co",
+]);
+
+/** A full stop that is part of an abbreviation, an initial or a decimal. */
+function isTerminator(text, i) {
+  if (text[i] !== ".") return true;
+  const before = text.slice(Math.max(0, i - 14), i);
+  const word = (before.match(/([A-Za-z.]+)$/) || ["", ""])[1].toLowerCase().replace(/\./g, "");
+  if (ABBREVIATIONS.has(word)) return false;
+  // A single capital is an initial ("J. R. R. Tolkien"), not an ending.
+  if (/[A-Z]$/.test(before) && !/[A-Za-z]{2}$/.test(before)) return false;
+  return true;
+}
+
+/**
+ * Text -> sentences.
+ *
+ * The unit of playback is a sentence: it is what gets highlighted, what a tap
+ * jumps to, and the largest piece the device synthesiser reliably finishes
+ * without cutting itself off mid-way.
+ */
+function splitSentences(text) {
+  const out = [];
+  let start = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    if (".!?…".indexOf(text[i]) === -1) continue;
+
+    let j = i;
+    while (j + 1 < text.length && ".!?…".indexOf(text[j + 1]) !== -1) j++;
+    while (j + 1 < text.length && "\"')]’”".indexOf(text[j + 1]) !== -1) j++;
+
+    const next = text[j + 1];
+    if (next === undefined) break;
+    if (!/\s/.test(next)) { i = j; continue; }
+    if (!isTerminator(text, i)) { i = j; continue; }
+
+    const piece = text.slice(start, j + 1).trim();
+    if (piece) out.push(piece);
+    start = j + 1;
+    i = j;
+  }
+
+  const tail = text.slice(start).trim();
+  if (tail) out.push(tail);
+
+  // "1." and "A." split off the front of numbered lists. On their own they are
+  // spoken as a bare number with a pause after it, so they ride along with the
+  // sentence they label. The pattern has to be a list label specifically —
+  // testing on length alone swallows any genuinely short sentence ("Why?").
+  const LABEL = /^\(?(?:\d{1,3}|[a-z]|[ivxlc]{1,4})[.)]$/i;
+  const merged = [];
+  for (const s of out) {
+    if (merged.length && s.length && LABEL.test(merged[merged.length - 1])) {
+      merged[merged.length - 1] += " " + s;
+    } else merged.push(s);
+  }
+  return merged;
+}
+
+/**
+ * What gets sent to the synthesiser, as opposed to what is shown on screen.
+ *
+ * Citation markers and URLs are read out in full otherwise, and "[14]" in the
+ * middle of a clause is the fastest way to lose the thread of a sentence.
+ */
+function speechable(text) {
+  return text
+    .replace(/\[\s*\d{1,3}\s*\]/g, " ")
+    .replace(/\(\s*(?:see\s+)?(?:fig|figure|table)\.?\s*\d+[a-z]?\s*\)/gi, " ")
+    .replace(/https?:\/\/\S+/g, " link ")
+    .replace(/\bwww\.\S+/g, " link ")
+    .replace(/\s*[\u2014\u2013]\s*/g, ", ")
+    .replace(/^[\u2022\u00B7\u25CF*]\s*/, "")
+    .replace(/_{2,}|-{3,}|\.{4,}/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/**
+ * Sentences -> request-sized chunks, for the cloud engines.
+ *
+ * One HTTP round trip per sentence would stutter and cost more; one per page
+ * would make the first word arrive ten seconds late. A few hundred characters
+ * is the middle, and chunks never straddle a paragraph so the pause between
+ * them lands somewhere a pause belongs.
+ */
+function chunkSentences(sentences, maxChars) {
+  const limit = maxChars || 600;
+  const chunks = [];
+  let cur = [];
+  let len = 0;
+
+  for (let i = 0; i < sentences.length; i++) {
+    const s = sentences[i];
+    const text = s.spoken || s.text || "";
+    if (cur.length && (len + text.length > limit || s.paraStart)) {
+      chunks.push({ from: cur[0], to: cur[cur.length - 1] });
+      cur = []; len = 0;
+    }
+    cur.push(i);
+    len += text.length;
+  }
+  if (cur.length) chunks.push({ from: cur[0], to: cur[cur.length - 1] });
+  return chunks;
+}
+
+/**
+ * Scores a device voice. Higher is better.
+ *
+ * iOS exposes a handful of voices to the web and most of them are the old
+ * compact ones, which sound like a train announcement. The downloadable
+ * "Enhanced" and "Premium" variants are genuinely close to a person and are
+ * what this is hunting for — hence the weighting, and hence the nudge in the
+ * settings sheet when none of them are installed.
+ */
+function rankVoice(voice, preferredLang) {
+  const name = (voice.name || "").toLowerCase();
+  const lang = (voice.lang || "").toLowerCase();
+  let score = 0;
+
+  // Language outweighs everything else. The best English voice in the world
+  // reading an Arabic reading aloud is not a near miss, it is unusable, so no
+  // amount of "Premium" can outvote the wrong language.
+  if (preferredLang && lang.startsWith(preferredLang.slice(0, 2).toLowerCase())) score += 200;
+  else if (lang.startsWith("en")) score += 20;
+
+  if (/premium|enhanced/.test(name)) score += 50;
+  if (/neural|natural/.test(name)) score += 45;
+  if (/siri/.test(name)) score += 35;
+  if (/google/.test(name)) score += 25;
+  if (/eloquence|compact|novelty|whisper|bells|bubbles|organ|zarvox|trinoids|boing|jester|bahh|albert|bad news|good news|wobble/.test(name)) score -= 60;
+  if (voice.localService) score += 5;
+  if (voice.default) score += 2;
+
+  return score;
+}
+
+/** Stable per-document id, so the same PDF reopens where it was left. */
+function documentKey(name, byteLength, sample) {
+  let h = 2166136261;
+  const seed = `${name}|${byteLength}|${sample}`;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
+}
+
+/** Seconds -> "4:07". */
+function clock(seconds) {
+  if (!isFinite(seconds) || seconds < 0) seconds = 0;
+  const m = Math.floor(seconds / 60);
+  const s = Math.floor(seconds % 60);
+  return `${m}:${String(s).padStart(2, "0")}`;
+}
+
+/**
+ * Turns extracted pages into the flat sentence list the player walks.
+ *
+ * This is the whole text pipeline in one call, and the one function the tests
+ * lean on hardest: pages in, `{paragraphs, sentences}` out, with each sentence
+ * carrying the page it came from and whether that page had to be OCR'd.
+ */
+function buildScript(pages) {
+  const lineSets = stripRunningLines(pages.map((p) => p.lines || []));
+
+  const paragraphs = [];
+  const sentences = [];
+
+  pages.forEach((page, idx) => {
+    const paras = linesToParagraphs(lineSets[idx].map(normalizeGlyphs));
+    if (!paras.length) return;
+
+    paragraphs.push({ pageBreak: true, page: page.number, ocr: page.source === "ocr" });
+
+    for (const text of paras) {
+      const parts = splitSentences(text);
+      const para = { text, sentences: [] };
+      parts.forEach((raw, k) => {
+        const spoken = speechable(raw);
+        if (!spoken) return;
+        para.sentences.push(sentences.length);
+        sentences.push({
+          text: raw,
+          spoken,
+          page: page.number,
+          ocr: page.source === "ocr",
+          paraStart: k === 0,
+        });
+      });
+      if (para.sentences.length) paragraphs.push(para);
+    }
+  });
+
+  return { paragraphs, sentences };
+}
+
+/* =====================================================================
+   PIPELINE END
+   ===================================================================== */
+</script>
+
+<script>
+/* =====================================================================
+   The player. DOM, network and audio live below this line.
+   ===================================================================== */
+(() => {
+"use strict";
+
+const VERSION = "2026-09-16a";
+
+// Pinned versions, because "latest" on a CDN is a script that can change under
+// a phone that is working fine today. The worker and the OCR core have to be
+// the matching builds or tesseract refuses to start.
+const CDN = {
+  pdfjs:  "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",
+  pdfWorker: "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+  tesseract: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js",
+  tesseractWorker: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js",
+  tesseractCore: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1",
+};
+
+const STORE_SETTINGS = "readaloud.settings";
+const STORE_LIBRARY = "readaloud.library";
+const LIBRARY_LIMIT = 12;
+
+const DEFAULTS = {
+  engine: "device",
+  deviceVoice: "",
+  rate: 1,
+  ocrLang: "eng",
+  elevenKey: "", elevenVoice: "21m00Tcm4TlvDq8ikWAM", elevenModel: "eleven_turbo_v2_5",
+  openaiKey: "", openaiVoice: "alloy", openaiModel: "gpt-4o-mini-tts",
+};
+
+const $ = (id) => document.getElementById(id);
+
+// ------------------------------------------------------------- settings
+
+let settings = { ...DEFAULTS };
+try { Object.assign(settings, JSON.parse(localStorage.getItem(STORE_SETTINGS) || "{}")); } catch (e) {}
+
+function saveSettings() {
+  try { localStorage.setItem(STORE_SETTINGS, JSON.stringify(settings)); } catch (e) {}
+}
+
+// --------------------------------------------------------------- library
+
+function readLibrary() {
+  try { return JSON.parse(localStorage.getItem(STORE_LIBRARY) || "[]"); } catch (e) { return []; }
+}
+
+/**
+ * Keeps the extracted text, not the PDF.
+ *
+ * Re-opening then costs nothing — no re-parse, and above all no second OCR
+ * pass, which is the slow and expensive half. Storage is small and shared, so
+ * the list is capped and the oldest entry is dropped first; if the browser
+ * still refuses the write, the reader carries on without a library rather than
+ * failing the thing the user actually asked for.
+ */
+function writeLibrary(entry) {
+  const lib = readLibrary().filter((e) => e.key !== entry.key);
+  lib.unshift(entry);
+  while (lib.length > LIBRARY_LIMIT) lib.pop();
+
+  for (let attempt = 0; attempt < LIBRARY_LIMIT; attempt++) {
+    try { localStorage.setItem(STORE_LIBRARY, JSON.stringify(lib)); return; }
+    catch (e) { if (lib.length <= 1) return; lib.pop(); }
+  }
+}
+
+function rememberPosition(key, index) {
+  const lib = readLibrary();
+  const hit = lib.find((e) => e.key === key);
+  if (!hit) return;
+  hit.index = index;
+  hit.at = Date.now();
+  try { localStorage.setItem(STORE_LIBRARY, JSON.stringify(lib)); } catch (e) {}
+}
+
+// ------------------------------------------------------------------ ui
+
+let toastTimer = null;
+function toast(msg, ms) {
+  const el = $("toast");
+  el.textContent = msg;
+  el.classList.add("on");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("on"), ms || 2600);
+}
+
+function show(stage) {
+  $("pick").style.display = stage === "pick" ? "" : "none";
+  $("working").classList.toggle("on", stage === "working");
+  $("doc").classList.toggle("on", stage === "doc");
+  $("bar").classList.toggle("on", stage === "doc");
+}
+
+function progress(title, detail, frac) {
+  if (title != null) $("work-title").textContent = title;
+  if (detail != null) $("work-detail").textContent = detail;
+  if (frac != null) $("work-meter").style.width = Math.round(frac * 100) + "%";
+}
+
+// ------------------------------------------------------------- loading
+
+const loaded = {};
+function loadScript(url) {
+  if (loaded[url]) return loaded[url];
+  loaded[url] = new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = url;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error("Could not load " + url));
+    document.head.appendChild(s);
+  });
+  return loaded[url];
+}
+
+async function pdfjs() {
+  await loadScript(CDN.pdfjs);
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = CDN.pdfWorker;
+  return window.pdfjsLib;
+}
+
+// ----------------------------------------------------------- extraction
+
+let ocrWorker = null;
+let ocrWorkerLang = null;
+
+async function getOcrWorker(lang, onProgress) {
+  if (ocrWorker && ocrWorkerLang === lang) return ocrWorker;
+  if (ocrWorker) { try { await ocrWorker.terminate(); } catch (e) {} ocrWorker = null; }
+
+  await loadScript(CDN.tesseract);
+  onProgress("Fetching the OCR model — about 15 MB, once per language.");
+  ocrWorker = await window.Tesseract.createWorker(lang, 1, {
+    workerPath: CDN.tesseractWorker,
+    corePath: CDN.tesseractCore,
+    logger: (m) => {
+      if (m.status === "recognizing text") onProgress(`Reading the page · ${Math.round(m.progress * 100)}%`);
+      else if (m.status) onProgress(m.status.replace(/^\w/, (c) => c.toUpperCase()));
+    },
+  });
+  ocrWorkerLang = lang;
+  return ocrWorker;
+}
+
+/**
+ * Renders a page to a bitmap for OCR.
+ *
+ * Resolution is the single biggest lever on whether OCR gets a word right —
+ * tesseract wants roughly 300 dpi, which for a letter page is about 2500
+ * pixels wide. The cap is there because a phone will run out of memory long
+ * before it runs out of patience: a canvas past ~6 megapixels is where iOS
+ * starts handing back blank images instead of an error.
+ */
+async function pageToCanvas(page) {
+  const base = page.getViewport({ scale: 1 });
+  let scale = Math.min(3.2, Math.max(1.6, 2200 / base.width));
+  let view = page.getViewport({ scale });
+
+  const MAX_PIXELS = 6e6;
+  if (view.width * view.height > MAX_PIXELS) {
+    scale *= Math.sqrt(MAX_PIXELS / (view.width * view.height));
+    view = page.getViewport({ scale });
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.floor(view.width);
+  canvas.height = Math.floor(view.height);
+  const ctx = canvas.getContext("2d", { alpha: false });
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  await page.render({ canvasContext: ctx, viewport: view }).promise;
+  return canvas;
+}
+
+/**
+ * One PDF -> pages of lines, running OCR only where the text layer came up
+ * short.
+ *
+ * The order matters: every page is asked for its text first, and the scan
+ * verdict is counted up before a single pixel is rendered. A forty-page
+ * born-digital reading then never touches tesseract, never downloads the
+ * model, and is ready in under a second.
+ */
+async function extractDocument(bytes, label, pageOffset, ui) {
+  const lib = await pdfjs();
+  const doc = await lib.getDocument({
+    data: bytes,
+    disableFontFace: true,
+    isEvalSupported: false,
+    useSystemFonts: false,
+  }).promise;
+
+  const pages = [];
+  for (let n = 1; n <= doc.numPages; n++) {
+    ui.mark(pageOffset + n - 1, "busy");
+    progress(null, `Page ${n} of ${doc.numPages}`, (n - 1) / doc.numPages * 0.5);
+    const page = await doc.getPage(n);
+    const content = await page.getTextContent();
+    const lines = itemsToLines(content.items);
+    const verdict = judgePage(lines.join(" "));
+    pages.push({ number: pageOffset + n, label, lines, source: "text", verdict, _n: n });
+    ui.mark(pageOffset + n - 1, verdict === "text" ? "text" : "empty");
+    page.cleanup();
+  }
+
+  const needOcr = pages.filter((p) => p.verdict !== "text");
+
+  if (needOcr.length) {
+    progress(
+      needOcr.length === pages.length ? "This one is a scan" : "Some pages are scans",
+      `${needOcr.length} of ${pages.length} pages have no text layer. Starting OCR…`,
+      0.5,
+    );
+    let worker;
+    try {
+      worker = await getOcrWorker(settings.ocrLang || "eng", (d) => progress(null, d));
+    } catch (e) {
+      toast("OCR could not start — reading the text pages only.");
+      await doc.destroy();
+      return pages;
+    }
+
+    for (let i = 0; i < needOcr.length; i++) {
+      const p = needOcr[i];
+      ui.mark(p.number - 1, "busy");
+      progress(null, `OCR · page ${p.number} (${i + 1} of ${needOcr.length})`, 0.5 + (i / needOcr.length) * 0.5);
+      try {
+        const page = await doc.getPage(p._n);
+        const canvas = await pageToCanvas(page);
+        const { data } = await worker.recognize(canvas);
+        canvas.width = canvas.height = 0;   // release the bitmap before the next page
+        page.cleanup();
+
+        const ocrLines = String(data.text || "").split("\n").map((l) => l.replace(/\s+/g, " ").trim());
+        if (ocrLines.join("").length > p.lines.join("").length) {
+          p.lines = ocrLines;
+          p.source = "ocr";
+          p.confidence = data.confidence;
+        }
+      } catch (e) {
+        console.warn("OCR failed on page " + p.number, e);
+      }
+      ui.mark(p.number - 1, p.source === "ocr" ? "ocr" : "empty");
+    }
+  }
+
+  await doc.destroy();
+  return pages;
+}
+
+async function extractAll(files) {
+  const total = files.length;
+  let offset = 0;
+  let pages = [];
+  const map = $("pagemap");
+  map.innerHTML = "";
+
+  const ui = {
+    mark(i, cls) {
+      while (map.children.length <= i) map.appendChild(document.createElement("b"));
+      map.children[i].className = cls;
+    },
+  };
+
+  for (let f = 0; f < total; f++) {
+    const file = files[f];
+    progress(
+      total > 1 ? `Opening ${f + 1} of ${total}` : "Opening " + file.name,
+      "Reading the text layer…",
+      0,
+    );
+    const bytes = new Uint8Array(await file.arrayBuffer());
+    const got = await extractDocument(bytes, total > 1 ? file.name : null, offset, ui);
+    pages = pages.concat(got);
+    offset += got.length;
+  }
+  return pages;
+}
+
+// -------------------------------------------------------------- render
+
+let doc = null;   // { key, name, pages, paragraphs, sentences }
+
+function renderDocument() {
+  $("doc-title").textContent = doc.name;
+
+  const ocrPages = doc.pages.filter((p) => p.source === "ocr").length;
+  const blank = doc.pages.filter((p) => p.source !== "ocr" && p.verdict !== "text").length;
+  const words = doc.sentences.reduce((n, s) => n + s.spoken.split(" ").length, 0);
+
+  const pills = [
+    ["", `${doc.pages.length} page${doc.pages.length === 1 ? "" : "s"}`],
+    ["", `${words.toLocaleString()} words`],
+    ["", `~${Math.max(1, Math.round(words / 155))} min`],
+  ];
+  if (ocrPages) pills.push(["ocr", `${ocrPages} page${ocrPages === 1 ? "" : "s"} OCR'd`]);
+  else pills.push(["ok", "clean text layer"]);
+  if (blank) pills.push(["warn", `${blank} page${blank === 1 ? "" : "s"} unreadable`]);
+
+  $("doc-pills").innerHTML = "";
+  for (const [cls, text] of pills) {
+    const el = document.createElement("span");
+    el.className = "pill " + cls;
+    el.textContent = text;
+    $("doc-pills").appendChild(el);
+  }
+
+  const reader = $("reader");
+  reader.innerHTML = "";
+  for (const item of doc.paragraphs) {
+    if (item.pageBreak) {
+      const hr = document.createElement("div");
+      hr.className = "pagebreak" + (item.ocr ? " scan" : "");
+      hr.textContent = item.ocr ? `Page ${item.page} · OCR` : `Page ${item.page}`;
+      reader.appendChild(hr);
+      continue;
+    }
+    const p = document.createElement("p");
+    for (const i of item.sentences) {
+      const s = document.createElement("s-t");
+      s.dataset.i = String(i);
+      s.textContent = doc.sentences[i].text + " ";
+      p.appendChild(s);
+    }
+    reader.appendChild(p);
+  }
+}
+
+let currentEl = null;
+function highlight(index, scroll) {
+  if (currentEl) currentEl.className = "done";
+  const el = document.querySelector(`s-t[data-i="${index}"]`);
+  currentEl = el;
+  if (!el) return;
+  el.className = "now";
+  if (scroll !== false) {
+    const box = el.getBoundingClientRect();
+    const want = window.innerHeight * 0.38;
+    if (box.top < 90 || box.top > window.innerHeight - 160) {
+      window.scrollBy({ top: box.top - want, behavior: "smooth" });
+    }
+  }
+}
+
+// -------------------------------------------------------------- engines
+
+/**
+ * The device synthesiser. Free, instant, offline, and only as good as the
+ * voice iOS has been asked to download.
+ *
+ * One sentence per utterance. Handing it a whole page is where every browser's
+ * speech implementation starts truncating, losing the end, or stalling
+ * outright, and one sentence is the unit the UI highlights anyway.
+ */
+class DeviceEngine {
+  constructor(player) {
+    this.player = player;
+    this.synth = window.speechSynthesis;
+    this.gen = 0;
+    this.voice = null;
+  }
+
+  static available() { return typeof window.speechSynthesis !== "undefined"; }
+
+  pickVoice() {
+    const voices = this.synth.getVoices() || [];
+    if (!voices.length) return null;
+    if (settings.deviceVoice) {
+      const exact = voices.find((v) => v.voiceURI === settings.deviceVoice || v.name === settings.deviceVoice);
+      if (exact) return exact;
+    }
+    return voices.slice().sort((a, b) => rankVoice(b, "en") - rankVoice(a, "en"))[0];
+  }
+
+  start(index) {
+    this.gen++;
+    this.synth.cancel();
+    this.voice = this.pickVoice();
+    this.speak(index, this.gen);
+  }
+
+  speak(index, gen) {
+    if (gen !== this.gen) return;
+    if (index >= doc.sentences.length) { this.player.finished(); return; }
+
+    this.player.at(index);
+
+    const u = new SpeechSynthesisUtterance(doc.sentences[index].spoken);
+    if (this.voice) { u.voice = this.voice; u.lang = this.voice.lang; }
+    u.rate = Math.max(0.1, Math.min(2, settings.rate));
+    u.pitch = 1;
+    u.onend = () => { if (gen === this.gen) this.speak(index + 1, gen); };
+    u.onerror = (e) => {
+      if (gen !== this.gen) return;
+      // "interrupted" and "canceled" are our own cancel() landing late.
+      if (e.error === "interrupted" || e.error === "canceled") return;
+      console.warn("speech error", e.error);
+      this.speak(index + 1, gen);
+    };
+    this.synth.speak(u);
+  }
+
+  pause() { this.gen++; this.synth.cancel(); }
+  stop() { this.gen++; this.synth.cancel(); }
+  setRate() { if (this.player.playing) this.start(this.player.index); }
+}
+
+/**
+ * The cloud engines. A real voice, at roughly a tenth of a cent a page.
+ *
+ * Text goes out in small chunks so the first word arrives quickly, the next
+ * chunk is fetched while the current one plays, and the sentence highlight is
+ * interpolated across the chunk by character position — near enough to follow
+ * with your eyes, and it makes tapping a sentence seek to the right second
+ * rather than restarting the paragraph.
+ */
+class CloudEngine {
+  constructor(player, provider) {
+    this.player = player;
+    this.provider = provider;
+    this.audio = new Audio();
+    this.audio.preload = "auto";
+    this.gen = 0;
+    this.cache = new Map();
+    this.chunks = chunkSentences(doc.sentences, 350);
+
+    this.audio.addEventListener("ended", () => this.advance());
+    this.audio.addEventListener("timeupdate", () => this.tick());
+    this.audio.addEventListener("error", () => {
+      if (!this.audio.src) return;
+      this.player.fail("The audio for that passage would not play.");
+    });
+  }
+
+  chunkFor(sentence) {
+    for (let i = 0; i < this.chunks.length; i++) {
+      if (sentence >= this.chunks[i].from && sentence <= this.chunks[i].to) return i;
+    }
+    return this.chunks.length - 1;
+  }
+
+  textOf(c) {
+    const ch = this.chunks[c];
+    const out = [];
+    for (let i = ch.from; i <= ch.to; i++) out.push(doc.sentences[i].spoken);
+    return out.join(" ");
+  }
+
+  async blobFor(c) {
+    if (this.cache.has(c)) return this.cache.get(c);
+    const url = await this.synthesise(this.textOf(c));
+    this.cache.set(c, url);
+    // Eight chunks is a couple of minutes of audio held at once — enough to
+    // skip back through without re-billing, small enough not to matter.
+    while (this.cache.size > 8) {
+      const oldest = this.cache.keys().next().value;
+      URL.revokeObjectURL(this.cache.get(oldest));
+      this.cache.delete(oldest);
+    }
+    return url;
+  }
+
+  async synthesise(text) {
+    const res = this.provider === "elevenlabs"
+      ? await fetch(
+          `https://api.elevenlabs.io/v1/text-to-speech/${encodeURIComponent(settings.elevenVoice)}?output_format=mp3_44100_128`,
+          {
+            method: "POST",
+            headers: { "xi-api-key": settings.elevenKey, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              text,
+              model_id: settings.elevenModel,
+              voice_settings: { stability: 0.45, similarity_boost: 0.75, style: 0.1, use_speaker_boost: true },
+            }),
+          })
+      : await fetch("https://api.openai.com/v1/audio/speech", {
+          method: "POST",
+          headers: { Authorization: "Bearer " + settings.openaiKey, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: settings.openaiModel,
+            voice: settings.openaiVoice,
+            input: text,
+            response_format: "mp3",
+          }),
+        });
+
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      throw new Error(`${res.status} ${detail.slice(0, 180)}`);
+    }
+    return URL.createObjectURL(await res.blob());
+  }
+
+  async start(index) {
+    const gen = ++this.gen;
+    const c = this.chunkFor(index);
+    this.player.at(index);
+    this.player.note("buffering…");
+
+    let url;
+    try { url = await this.blobFor(c); }
+    catch (e) {
+      this.player.fail(this.explain(e));
+      return;
+    }
+    if (gen !== this.gen) return;
+
+    this.current = c;
+    this.audio.src = url;
+    this.audio.playbackRate = Math.max(0.5, Math.min(2.5, settings.rate));
+
+    // Seek to where the requested sentence falls inside the chunk, by share of
+    // characters. Duration is only known once metadata has arrived.
+    const seek = () => {
+      const ch = this.chunks[c];
+      if (index > ch.from && isFinite(this.audio.duration)) {
+        this.audio.currentTime = this.audio.duration * this.share(c, index);
+      }
+      this.audio.play().catch((err) => this.player.fail("iOS blocked playback: " + err.message));
+      this.player.note("");
+    };
+
+    if (this.audio.readyState >= 1) seek();
+    else this.audio.addEventListener("loadedmetadata", seek, { once: true });
+
+    this.prefetch(c + 1);
+  }
+
+  /** Fraction of the chunk's characters that come before `sentence`. */
+  share(c, sentence) {
+    const ch = this.chunks[c];
+    let before = 0;
+    let total = 0;
+    for (let i = ch.from; i <= ch.to; i++) {
+      const n = doc.sentences[i].spoken.length + 1;
+      if (i < sentence) before += n;
+      total += n;
+    }
+    return total ? before / total : 0;
+  }
+
+  prefetch(c) {
+    if (c >= this.chunks.length || this.cache.has(c)) return;
+    this.blobFor(c).catch(() => {});
+  }
+
+  tick() {
+    if (this.current == null || !isFinite(this.audio.duration) || !this.audio.duration) return;
+    const ch = this.chunks[this.current];
+    const frac = this.audio.currentTime / this.audio.duration;
+
+    let acc = 0;
+    let total = 0;
+    for (let i = ch.from; i <= ch.to; i++) total += doc.sentences[i].spoken.length + 1;
+
+    let at = ch.from;
+    for (let i = ch.from; i <= ch.to; i++) {
+      const n = doc.sentences[i].spoken.length + 1;
+      if (frac * total >= acc) at = i;
+      acc += n;
+    }
+    if (at !== this.player.index) this.player.at(at);
+
+    if (frac > 0.6) this.prefetch(this.current + 1);
+  }
+
+  advance() {
+    const next = this.current + 1;
+    if (next >= this.chunks.length) { this.player.finished(); return; }
+    this.start(this.chunks[next].from);
+  }
+
+  explain(e) {
+    const msg = String(e.message || e);
+    if (/^401/.test(msg)) return "That API key was rejected.";
+    if (/^429/.test(msg)) return "Rate limited or out of credit.";
+    if (/Failed to fetch|NetworkError|Load failed/i.test(msg)) {
+      return "Could not reach the voice API from here — falling back to the device voice.";
+    }
+    return "Voice API said: " + msg;
+  }
+
+  pause() { this.audio.pause(); }
+  resume() { this.audio.play().catch(() => {}); }
+  stop() { this.gen++; this.audio.pause(); this.audio.removeAttribute("src"); this.current = null; }
+  setRate() { this.audio.playbackRate = Math.max(0.5, Math.min(2.5, settings.rate)); }
+}
+
+// --------------------------------------------------------------- player
+
+const player = {
+  index: 0,
+  playing: false,
+  engine: null,
+  saveTimer: null,
+
+  build() {
+    if (this.engine) this.engine.stop();
+    const want = settings.engine;
+
+    if (want !== "device") {
+      const key = want === "elevenlabs" ? settings.elevenKey : settings.openaiKey;
+      if (!key) {
+        toast("No API key for that voice yet — using the device voice.");
+        this.engine = new DeviceEngine(this);
+        return;
+      }
+      this.engine = new CloudEngine(this, want);
+      return;
+    }
+    this.engine = new DeviceEngine(this);
+  },
+
+  at(index) {
+    this.index = index;
+    highlight(index, true);
+    $("track-fill").style.width = (index / Math.max(1, doc.sentences.length - 1)) * 100 + "%";
+
+    const s = doc.sentences[index];
+    $("meta-1").textContent = `${index + 1} / ${doc.sentences.length}`;
+    $("meta-2").textContent = s ? `page ${s.page}${s.ocr ? " · ocr" : ""}` : "";
+
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => rememberPosition(doc.key, index), 1200);
+  },
+
+  note(text) { if (text) $("meta-2").textContent = text; },
+
+  async play(from) {
+    if (from != null) this.index = from;
+    this.playing = true;
+    document.body.classList.add("speaking");
+    $("btn-play").textContent = "❙❙";
+    $("btn-play").setAttribute("aria-label", "Pause");
+    await keepAwake(true);
+    mediaSession();
+    this.engine.start(this.index);
+  },
+
+  pause() {
+    this.playing = false;
+    document.body.classList.remove("speaking");
+    $("btn-play").textContent = "▶";
+    $("btn-play").setAttribute("aria-label", "Play");
+    keepAwake(false);
+    this.engine.pause();
+    rememberPosition(doc.key, this.index);
+  },
+
+  toggle() { this.playing ? this.pause() : this.play(); },
+
+  step(n) {
+    const next = Math.max(0, Math.min(doc.sentences.length - 1, this.index + n));
+    if (this.playing) this.play(next);
+    else { this.at(next); }
+  },
+
+  jump(index) {
+    const next = Math.max(0, Math.min(doc.sentences.length - 1, index));
+    if (this.playing) this.play(next);
+    else this.at(next);
+  },
+
+  finished() {
+    this.pause();
+    this.at(0);
+    toast("That's the end of the document.");
+  },
+
+  /**
+   * A cloud voice that cannot answer is not a reason to stop reading. The
+   * device voice is always there, so a dead key or a blocked request drops to
+   * it and says so, rather than leaving a play button that does nothing.
+   */
+  fail(message) {
+    toast(message, 4200);
+    if (settings.engine !== "device") {
+      settings.engine = "device";
+      saveSettings();
+      syncSettingsSheet();
+      this.build();
+      if (this.playing) this.engine.start(this.index);
+    } else {
+      this.pause();
+    }
+  },
+};
+
+// ------------------------------------------------------- screen + lock
+
+let wakeLock = null;
+async function keepAwake(on) {
+  try {
+    if (on && !wakeLock && navigator.wakeLock) {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } else if (!on && wakeLock) {
+      await wakeLock.release();
+      wakeLock = null;
+    }
+  } catch (e) { /* denied, or not supported — playback is unaffected */ }
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && player.playing && !wakeLock) keepAwake(true);
+});
+
+function mediaSession() {
+  if (!navigator.mediaSession || !doc) return;
+  try {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: doc.name,
+      artist: "Read Aloud",
+      album: "Term Board",
+    });
+    navigator.mediaSession.setActionHandler("play", () => player.play());
+    navigator.mediaSession.setActionHandler("pause", () => player.pause());
+    navigator.mediaSession.setActionHandler("previoustrack", () => player.step(-1));
+    navigator.mediaSession.setActionHandler("nexttrack", () => player.step(1));
+  } catch (e) {}
+}
+
+// ----------------------------------------------------------- open a doc
+
+async function openFiles(files) {
+  const pdfs = Array.from(files).filter((f) => /\.pdf$/i.test(f.name) || f.type === "application/pdf");
+  if (!pdfs.length) { toast("That wasn't a PDF."); return; }
+
+  show("working");
+  progress("Opening…", "", 0);
+
+  let pages;
+  try {
+    pages = await extractAll(pdfs);
+  } catch (e) {
+    console.error(e);
+    doc = null;
+    show("pick");
+    toast("That PDF could not be opened: " + (e.message || e), 4500);
+    return;
+  }
+
+  const name = pdfs.length === 1 ? pdfs[0].name.replace(/\.pdf$/i, "") : `${pdfs.length} documents`;
+  const key = documentKey(name, pdfs.reduce((n, f) => n + f.size, 0), String(pages.length));
+  mount({ key, name, pages });
+
+  // Where to pick up. The page's own library wins when it has an entry; the
+  // Scriptable wrapper passes a position in because a WebView it spins up
+  // fresh each run has no localStorage worth trusting.
+  const prior = readLibrary().find((e) => e.key === key);
+  const resume = (prior && prior.index) || pendingResume || 0;
+  pendingResume = 0;
+  if (resume > 3 && resume < doc.sentences.length) {
+    player.jump(resume);
+    toast("Picked up where you left off.");
+  }
+}
+
+let pendingResume = 0;
+
+function mount(entry) {
+  // Cleared first. A failed open that left the previous document in place
+  // would report that one's position back to Scriptable, which would then
+  // save it under the new file's key.
+  doc = null;
+  const script = buildScript(entry.pages);
+
+  if (!script.sentences.length) {
+    show("pick");
+    toast("Nothing readable came out of that — even after OCR.", 4500);
+    return;
+  }
+
+  doc = { key: entry.key, name: entry.name, pages: entry.pages, ...script };
+  renderDocument();
+  show("doc");
+  window.scrollTo(0, 0);
+
+  player.build();
+  player.at(0);
+
+  writeLibrary({
+    key: doc.key,
+    name: doc.name,
+    pages: doc.pages,
+    index: 0,
+    sentences: doc.sentences.length,
+    at: Date.now(),
+  });
+}
+
+// ------------------------------------------------------------- settings
+
+function syncSettingsSheet() {
+  for (const b of document.querySelectorAll("#seg-engine button")) {
+    b.classList.toggle("sel", b.dataset.engine === settings.engine);
+  }
+
+  const cloud = settings.engine !== "device";
+  $("f-devicevoice").hidden = cloud;
+  $("f-key").hidden = !cloud;
+  $("f-voiceid").hidden = !cloud;
+  $("f-model").hidden = !cloud;
+
+  const note = $("key-note");
+  if (cloud) {
+    const eleven = settings.engine === "elevenlabs";
+    $("in-key").value = eleven ? settings.elevenKey : settings.openaiKey;
+    $("in-voiceid").value = eleven ? settings.elevenVoice : settings.openaiVoice;
+    $("in-model").value = eleven ? settings.elevenModel : settings.openaiModel;
+    $("lab-voiceid").textContent = eleven ? "Voice ID" : "Voice name";
+    $("in-voiceid").placeholder = eleven ? "21m00Tcm4TlvDq8ikWAM" : "alloy";
+    note.hidden = false;
+    note.textContent = eleven
+      ? "The key is stored on this device only, and sent to api.elevenlabs.io and nowhere else. Voice IDs are on the ElevenLabs voice page."
+      : "The key is stored on this device only, and sent to api.openai.com and nowhere else. Voices: alloy, echo, fable, onyx, nova, shimmer, coral, sage.";
+  } else {
+    note.hidden = !!bestDeviceVoiceIsGood();
+    note.textContent =
+      "None of the voices installed here are the good ones. Settings → Accessibility → " +
+      "Spoken Content → Voices → English, and download a Premium voice — it is the " +
+      "difference between a satnav and a person, and it is free.";
+  }
+}
+
+function bestDeviceVoiceIsGood() {
+  if (!DeviceEngine.available()) return true;
+  const voices = window.speechSynthesis.getVoices() || [];
+  return voices.some((v) => /premium|enhanced|neural|natural|siri/i.test(v.name || ""));
+}
+
+function fillVoices() {
+  if (!DeviceEngine.available()) return;
+  const voices = (window.speechSynthesis.getVoices() || [])
+    .slice()
+    .sort((a, b) => rankVoice(b, "en") - rankVoice(a, "en"));
+
+  const sel = $("sel-voice");
+  sel.innerHTML = "";
+  const auto = document.createElement("option");
+  auto.value = "";
+  auto.textContent = "Automatic — best installed";
+  sel.appendChild(auto);
+
+  for (const v of voices) {
+    const o = document.createElement("option");
+    o.value = v.voiceURI || v.name;
+    o.textContent = `${v.name} · ${v.lang}`;
+    sel.appendChild(o);
+  }
+  sel.value = settings.deviceVoice || "";
+  syncSettingsSheet();
+}
+
+// ------------------------------------------------------------- library
+
+function openLibrarySheet() {
+  const list = $("lib-list");
+  list.innerHTML = "";
+  const lib = readLibrary();
+
+  if (!lib.length) {
+    list.innerHTML = '<p class="note">Nothing read on this device yet.</p>';
+  }
+
+  for (const entry of lib) {
+    const row = document.createElement("button");
+    row.className = "ctl";
+    row.style.cssText = "width:100%;text-align:left;margin-bottom:6px;height:auto;padding:12px;";
+    const pct = entry.sentences ? Math.round((entry.index / entry.sentences) * 100) : 0;
+    row.innerHTML =
+      `<div style="font-weight:600;font-size:14px;margin-bottom:3px">${escapeHtml(entry.name)}</div>` +
+      `<div style="font:400 11px/1 'IBM Plex Mono',monospace;color:var(--ink-faint)">` +
+      `${entry.pages.length} pages · ${pct}% through</div>`;
+    row.onclick = () => {
+      closeSheets();
+      mount(entry);
+      if (entry.index > 3) player.jump(entry.index);
+    };
+    list.appendChild(row);
+  }
+  $("sheet-lib").classList.add("on");
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function closeSheets() {
+  $("sheet-lib").classList.remove("on");
+  $("sheet-settings").classList.remove("on");
+}
+
+// ------------------------------------------------------------- wiring
+
+$("btn-pick").onclick = () => $("file").click();
+$("file").onchange = (e) => { openFiles(e.target.files); e.target.value = ""; };
+
+for (const ev of ["dragenter", "dragover"]) {
+  $("drop").addEventListener(ev, (e) => { e.preventDefault(); $("drop").classList.add("hot"); });
+}
+for (const ev of ["dragleave", "drop"]) {
+  $("drop").addEventListener(ev, (e) => { e.preventDefault(); $("drop").classList.remove("hot"); });
+}
+$("drop").addEventListener("drop", (e) => {
+  if (e.dataTransfer && e.dataTransfer.files.length) openFiles(e.dataTransfer.files);
+});
+
+$("btn-play").onclick = () => player.toggle();
+$("btn-back").onclick = () => player.step(-1);
+$("btn-fwd").onclick = () => player.step(1);
+
+const RATES = [0.8, 1, 1.15, 1.3, 1.5, 1.75, 2];
+const rateLabel = (r) => (Number.isInteger(r) ? r + ".0" : String(r)) + "\u00D7";
+
+$("btn-rate").onclick = () => {
+  const i = RATES.indexOf(settings.rate);
+  settings.rate = RATES[(i + 1) % RATES.length] || 1;
+  saveSettings();
+  $("btn-rate").textContent = rateLabel(settings.rate);
+  if (player.engine) player.engine.setRate();
+};
+
+$("track").onclick = (e) => {
+  if (!doc) return;
+  const box = $("track").getBoundingClientRect();
+  const frac = Math.max(0, Math.min(1, (e.clientX - box.left) / box.width));
+  player.jump(Math.round(frac * (doc.sentences.length - 1)));
+};
+
+$("reader").addEventListener("click", (e) => {
+  const el = e.target.closest ? e.target.closest("s-t") : null;
+  if (el) player.jump(Number(el.dataset.i));
+});
+
+$("btn-settings").onclick = () => { fillVoices(); $("sheet-settings").classList.add("on"); };
+$("btn-lib").onclick = openLibrarySheet;
+$("btn-clearlib").onclick = () => {
+  try { localStorage.removeItem(STORE_LIBRARY); } catch (e) {}
+  openLibrarySheet();
+  toast("Library cleared.");
+};
+
+for (const el of document.querySelectorAll("[data-close]")) el.onclick = closeSheets;
+
+for (const b of document.querySelectorAll("#seg-engine button")) {
+  b.onclick = () => {
+    settings.engine = b.dataset.engine;
+    saveSettings();
+    syncSettingsSheet();
+    if (doc) { const was = player.playing; player.pause(); player.build(); if (was) player.play(); }
+  };
+}
+
+$("sel-voice").onchange = (e) => {
+  settings.deviceVoice = e.target.value;
+  saveSettings();
+  if (doc && player.playing) player.play();
+};
+
+$("in-key").oninput = (e) => {
+  if (settings.engine === "elevenlabs") settings.elevenKey = e.target.value.trim();
+  else settings.openaiKey = e.target.value.trim();
+  saveSettings();
+};
+$("in-voiceid").oninput = (e) => {
+  if (settings.engine === "elevenlabs") settings.elevenVoice = e.target.value.trim();
+  else settings.openaiVoice = e.target.value.trim();
+  saveSettings();
+};
+$("in-model").oninput = (e) => {
+  if (settings.engine === "elevenlabs") settings.elevenModel = e.target.value.trim();
+  else settings.openaiModel = e.target.value.trim();
+  saveSettings();
+};
+$("in-lang").oninput = (e) => { settings.ocrLang = e.target.value.trim() || "eng"; saveSettings(); };
+
+document.addEventListener("keydown", (e) => {
+  if (!doc || e.target.tagName === "INPUT" || e.target.tagName === "SELECT") return;
+  if (e.code === "Space") { e.preventDefault(); player.toggle(); }
+  if (e.code === "ArrowRight") player.step(1);
+  if (e.code === "ArrowLeft") player.step(-1);
+});
+
+if (DeviceEngine.available()) {
+  window.speechSynthesis.onvoiceschanged = fillVoices;
+  window.speechSynthesis.getVoices();
+}
+
+$("version").textContent = "term board · reader " + VERSION;
+$("btn-rate").textContent = rateLabel(settings.rate);
+$("in-lang").value = settings.ocrLang;
+syncSettingsSheet();
+
+// ---------------------------------------------------- scriptable bridge
+
+/**
+ * How the Scriptable wrapper hands a PDF over.
+ *
+ * Scriptable can evaluate JavaScript in a WebView before presenting it but
+ * not while it is on screen, so the file is pushed in first, base64 in
+ * slices — one 13 MB string argument is enough to make an older phone drop
+ * the whole call — and the state is read back out once the sheet is dismissed.
+ */
+const injected = [];
+window.TermBoardReader = {
+  version: VERSION,
+
+  settings(patch) { Object.assign(settings, patch || {}); saveSettings(); syncSettingsSheet(); return true; },
+
+  pushChunk(b64) { injected.push(b64); return injected.length; },
+
+  async openInjected(name, resume) {
+    pendingResume = Number(resume) || 0;
+    const b64 = injected.join("");
+    injected.length = 0;
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const file = new File([bytes], name || "document.pdf", { type: "application/pdf" });
+    await openFiles([file]);
+    return doc ? { ok: true, pages: doc.pages.length, sentences: doc.sentences.length } : { ok: false };
+  },
+
+  /**
+   * Text rather than a PDF — a reading the scraper already pulled out of
+   * Learning Suite. Same player, same position tracking, no parsing and no
+   * OCR, so it starts speaking straight away.
+   */
+  async openText(name, text, resume) {
+    const body = text != null ? text : injected.join("");
+    injected.length = 0;
+    pendingResume = Number(resume) || 0;
+
+    const lines = String(body).split("\n").map((l) => l.replace(/\s+/g, " ").trim());
+    const key = documentKey(name || "reading", body.length, "text");
+    mount({ key, name: name || "Reading", pages: [{ number: 1, source: "text", verdict: "text", lines }] });
+
+    if (doc) {
+      const prior = readLibrary().find((e) => e.key === key);
+      const at = (prior && prior.index) || pendingResume || 0;
+      pendingResume = 0;
+      if (at > 3 && at < doc.sentences.length) player.jump(at);
+    }
+    return doc ? { ok: true, sentences: doc.sentences.length } : { ok: false };
+  },
+
+  state() {
+    return doc
+      ? { key: doc.key, name: doc.name, index: player.index, sentences: doc.sentences.length,
+          ocr: doc.pages.filter((p) => p.source === "ocr").length }
+      : null;
+  },
+};
+
+// A Scriptable WebView has no file picker worth the name, so the drop zone
+// says something true in each place this page can run.
+if (navigator.userAgent.indexOf("Scriptable") !== -1 || window.__SCRIPTABLE__) {
+  $("pickhint").textContent = "launched from Scriptable";
+}
+
+show("pick");
+})();
+</script>
+</body>
+</html>

@@ -1,11 +1,12 @@
 # Term Board scraper
 
-Pulls BYU Learning Suite every morning and feeds three things from one scrape:
+Pulls BYU Learning Suite every morning and feeds four surfaces from one scrape:
 
 | Surface | What it gets |
 |---|---|
 | **Term Board** (Claude Artifact) | Assignments grouped by week, colour-coded by class, with live gradebook scores |
 | **TermBoard.js** (iOS Scriptable widget) | What's due next, current grades, and a one-tap voice walkthrough of an assignment |
+| **Read Aloud** (`docs/read.html` + `ReadAloud.js`) | Any PDF, scans included, read out loud. Share a file to it, or hit Listen on a reading the scraper already pulled |
 | **Supabase** | The durable copy: a snapshot per run, plus the extracted reading text |
 
 It replaces the manual pull that put ARAB 201 and IHUM 242 onto the board and
@@ -89,6 +90,8 @@ powershell -ExecutionPolicy Bypass -File windows\install-task.ps1
 | `node test/smoke.mjs` | Tests the date parsing, payload building and rendering. |
 | `node test/widget-logic.mjs` | Tests the widget's date bucketing and grade merge. |
 | `node test/widget-fit.mjs` | Estimates rendered height per widget size and fails on overflow. |
+| `node test/reader.mjs` | Tests the reader's text pipeline — line unwrapping, running headers, sentence splitting. |
+| `npm test` | All four. |
 
 ## The selectors need one calibration pass
 
@@ -126,9 +129,89 @@ Every assignment therefore carries a verdict:
 | `error` | The page or file could not be fetched. |
 
 Anything but `clean` shows as **⚑ no clean text** in the widget and in a
-dedicated section on the board, with the reason. OCR would fix the `image-only`
-cases; it is deliberately not in scope here, because a wrong OCR reading spoken
-aloud with confidence is worse than an honest "this one won't work".
+dedicated section on the board, with the reason.
+
+The scraper still does not OCR — a nightly Playwright run is the wrong place to
+spend four minutes a page on it, and a wrong reading committed to Supabase is
+wrong for the rest of the term. **Read Aloud does**, on the phone, on demand,
+and it labels what it did: an OCR'd page is marked `OCR` in the text and counted
+on the header pill, so a garbled sentence is attributable rather than mysterious.
+So `image-only` still means "the board cannot promise this one" — and it is no
+longer a dead end.
+
+## Read Aloud
+
+Give it a PDF, it reads the PDF to you. Text PDFs and scans both.
+
+```
+  a PDF            docs/read.html                          your ears
+  ┌────────┐      ┌───────────────────────────────┐       ┌─────────┐
+  │ share  │─────▶│ pdf.js      text layer        │       │ device  │
+  │ sheet  │      │   ↓ under 120 chars/page      │──────▶│  voice  │
+  │  or    │      │ tesseract.js  OCR that page   │       │   or    │
+  │ picker │      │   ↓                           │       │  cloud  │
+  └────────┘      │ unwrap · dehyphenate · split  │       │  voice  │
+                  └───────────────────────────────┘       └─────────┘
+```
+
+**Three ways in.** Share a PDF to **Read Aloud** from Files, Mail or Safari and
+it starts immediately. Run the script and it opens a picker. Or open a reading
+the scraper already extracted, straight from the board's **Listen** button —
+that one skips the parsing entirely, because the text is already in Supabase.
+
+**It is also just a URL.** The reader is a single page in `docs/`, so
+[read.html](https://iamrichardmaier-sudo.github.io/Term-Board/read.html) works
+in any browser, on a laptop or a borrowed phone, with no Scriptable involved.
+That is the whole reason it lives there and not as a string inside the script:
+one copy of the code, two ways to run it.
+
+### OCR only where it is needed
+
+Every page is asked for its text layer first, and the verdict is counted up
+before a single pixel is rendered. A forty-page born-digital reading therefore
+never touches tesseract, never downloads the 15 MB model, and is ready in about
+a second. A scan takes roughly five to fifteen seconds a page on a recent
+iPhone, shown page by page on a progress meter rather than behind a spinner.
+
+Pages that came from OCR are **labelled as such** — in the text, on the header
+pill, and in the status line under the controls. That is the deal that makes
+OCR acceptable here: not "trust it", but "here is which part you should not".
+
+### Voices
+
+| | Sounds like | Costs | Works offline |
+|---|---|---|---|
+| Device | fine, once you download a Premium voice | nothing | yes |
+| ElevenLabs | a person | ~$0.001 a page | no |
+| OpenAI | a person | ~$0.0003 a page | no |
+
+**Do the free thing first.** Settings → Accessibility → Spoken Content → Voices
+→ English → download a *Premium* voice. iOS ships compact voices by default and
+only exposes what is installed, so the reader is choosing from a bad list until
+you fix that — it is the difference between a satnav and a person, and it takes
+a minute.
+
+For a cloud voice, paste a key into the ⚙ sheet (in Safari) or the script's
+**Voice settings** menu (in Scriptable). Text goes out in ~350-character
+chunks, the next chunk is fetched while the current one plays, and the sentence
+highlight is interpolated across the chunk — so tapping a sentence seeks to the
+right second instead of restarting the paragraph. If the API refuses, the reader
+says why and drops to the device voice rather than sitting there silently.
+
+### What it will not do
+
+- **Keep talking with the screen locked, from Scriptable.** A Scriptable WebView
+  is suspended when it goes to the background. Opened in Safari with a cloud
+  voice it keeps playing, with lock-screen controls; with a device voice it does
+  not. This is a WebKit limitation, not a setting.
+- **Read a language you have not given it.** OCR defaults to `eng`; set another
+  [tesseract code](https://tesseract-ocr.github.io/tessdoc/Data-Files) in the ⚙
+  sheet (`ara`, `fra`, …) and it fetches that model. Voice selection weights
+  language above everything else, so an Arabic reading will not be handed to an
+  English voice that merely sounds nicer.
+- **Fix a bad scan.** A photo of a page at an angle in poor light comes out as
+  nonsense, and it will read the nonsense. Check the OCR label before trusting
+  a sentence that surprises you.
 
 ## Privacy
 
@@ -140,6 +223,19 @@ Scraped data is grades and instructors' copyrighted reading text, so:
   anon key in the widget grants nothing on its own, exactly as in `wazn-review.js`.
 - Your BYU password is encrypted with DPAPI under your Windows account. It is
   never written to the repo, and only needed when the Duo trust lapses.
+
+Read Aloud adds two of its own:
+
+- **PDFs never leave the phone.** Parsing and OCR both run on-device. The
+  network is touched only to fetch the libraries and, on first use of a
+  language, the OCR model.
+- **A cloud voice is an exception to that, and a real one.** Choosing ElevenLabs
+  or OpenAI sends the text of what you are reading to that company, a few
+  hundred characters at a time. For a course reading that is someone's
+  copyrighted text going to a third party — fine for most things, worth a
+  thought for some. The device voice sends nothing anywhere. API keys are held
+  in the iOS keychain when the reader is launched from Scriptable, and in the
+  page's own `localStorage` when it is opened as a URL.
 
 ## Layout
 
@@ -166,7 +262,9 @@ src/
   template/styles.css the Term Board's own CSS, reused unchanged
 scriptable/TermBoard.js         the widget
 scriptable/TermBoard-loader.js  optional: fetches the above at run time
+scriptable/ReadAloud.js         courier: PDF bytes -> the reader page -> your ears
+docs/read.html                  the reader itself. Also just a URL.
 supabase/001_term_board.sql
 windows/run-daily.ps1  install-task.ps1  publish-to-repo.ps1
-test/smoke.mjs
+test/smoke.mjs  widget-logic.mjs  widget-fit.mjs  reader.mjs
 ```
