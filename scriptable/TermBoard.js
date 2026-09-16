@@ -40,7 +40,7 @@
  * every run, so "which version is actually on the phone?" is answerable in two
  * seconds instead of by reading a diff.
  */
-const VERSION = "2026-08-31c";
+const VERSION = "2026-09-16a";
 
 const REPO = "iamrichardmaier-sudo/Term-Board";
 
@@ -77,7 +77,8 @@ const KEY_PASSWORD = "termboard.password";
 const CACHE_FILE = "term-board-widget-cache.json";
 
 const INK = "#ffffff";
-const BG = "#1c1c1e";
+const BG = "#0B0C13";
+const BRAND = "#8C9EDB";
 const MUTED = "#8e8e93";
 const FAINT = "#636366";
 const GOOD = "#30d158";
@@ -85,7 +86,12 @@ const WARN = "#ff9f0a";
 const BAD = "#ff453a";
 
 // Per-course accents, carried over from the board so the two read as one system.
-const COURSE_COLORS = { arab: "#7d8fd6", ihum: "#d9ad5e", econ: "#6fbfa8", gci: "#c99bce" };
+const COURSE_COLORS = { arab: "#8C9EDB", ihum: "#D9AD5E", econ: "#6FBFA8", gci: "#C99BCE" };
+
+// Only used to draw the term progress bar, and only as a fallback: if the feed
+// ever carries termStart/termEnd those win, so a changed calendar does not need
+// this file re-pasted. Matches TERM in src/config.js.
+const TERM_WINDOW = { starts: "2026-08-31", ends: "2026-12-18" };
 
 // claude.ai accepts a prompt in ?q=. Long ones get unwieldy as a URL, so the
 // deep link carries a trimmed version and the full text goes on the clipboard.
@@ -120,7 +126,7 @@ function formatDue(dateStr) {
   return df.string(new Date(dateStr));
 }
 
-function dueColor(dateStr) {
+function dueHex(dateStr) {
   const d = daysUntil(dateStr);
   if (d < 0) return BAD;
   if (d <= 1) return BAD;
@@ -274,14 +280,25 @@ function shortCode(courseCode) {
   return String(courseCode).split(/\s+/)[0];
 }
 
+// Each accent comes in two forms because the widget needs both: a Color for
+// text, and the bare hex for the tinted pill behind it, which has to be built
+// with an alpha the Color has already thrown away.
+function courseHex(courseCode) {
+  return COURSE_COLORS[groupOf(courseCode)] || MUTED;
+}
+
 function courseColor(courseCode) {
-  return new Color(COURSE_COLORS[groupOf(courseCode)] || MUTED);
+  return new Color(courseHex(courseCode));
+}
+
+function gradeHex(percent) {
+  if (percent >= 90) return GOOD;
+  if (percent >= 80) return WARN;
+  return BAD;
 }
 
 function gradeColor(percent) {
-  if (percent >= 90) return new Color(GOOD);
-  if (percent >= 80) return new Color(WARN);
-  return new Color(BAD);
+  return new Color(gradeHex(percent));
 }
 
 /**
@@ -346,46 +363,118 @@ function upcoming(data, limit) {
  *         "none"   omitted; there is no room and the list matters more
  */
 const LAYOUT = {
-  small:  { pad: 8,  title: 11, chip: 8,  row: 9,  due: 8,  gap: 1, headGap: 3, rows: 5,  grades: "none",   labels: false, footer: 7 },
-  medium: { pad: 9,  title: 12, chip: 8,  row: 10, due: 9,  gap: 1, headGap: 4, rows: 7,  grades: "inline", labels: false, footer: 7 },
-  large:  { pad: 12, title: 15, chip: 10, row: 12, due: 11, gap: 2, headGap: 6, rows: 9,  grades: "block",  labels: true,  footer: 9 },
+  small:  { pad: 10, title: 11, chip: 8,  row: 9,  due: 8,  gap: 2, headGap: 4, rows: 4, grades: "none",   labels: false, footer: 7, bar: false },
+  medium: { pad: 10, title: 12, chip: 8,  row: 10, due: 9,  gap: 2, headGap: 4, rows: 6, grades: "inline", labels: false, footer: 7, bar: false },
+  large:  { pad: 12, title: 15, chip: 10, row: 12, due: 11, gap: 2, headGap: 5, rows: 8, grades: "block",  labels: true,  footer: 9, bar: true  },
 };
+
+/**
+ * The background.
+ *
+ * A widget sits on a wallpaper, not on a page, and a flat #1c1c1e rectangle
+ * reads as a hole punched in the home screen. The gradient is barely there —
+ * a indigo cast at the top left falling to near-black — which is enough for
+ * the tile to look lit from somewhere rather than switched off.
+ */
+function backdrop() {
+  const g = new LinearGradient();
+  g.colors = [new Color("#1B2138"), new Color("#12141F"), new Color("#0B0C13")];
+  g.locations = [0, 0.55, 1];
+  g.startPoint = new Point(0, 0);
+  g.endPoint = new Point(1, 1);
+  return g;
+}
+
+/** A filled rounded chip. Native stacks, so it costs no image and no memory. */
+function chipStack(into, color, alpha, padV, padH) {
+  const s = into.addStack();
+  s.backgroundColor = new Color(color.replace("#", ""), alpha);
+  s.cornerRadius = 6;
+  s.setPadding(padV, padH, padV, padH);
+  s.centerAlignContent();
+  return s;
+}
+
+/** The colour bar down the left of an assignment row. */
+function accentBar(into, color, height) {
+  const bar = into.addStack();
+  bar.size = new Size(3, height);
+  bar.cornerRadius = 1.5;
+  bar.backgroundColor = new Color(color.replace("#", ""), 0.95);
+}
+
+/**
+ * How far through the term it is.
+ *
+ * Pure decoration, and the one thing on the widget that changes every day
+ * whether or not the scrape ran — which is exactly why it earns its place. A
+ * board with nothing due still tells you where you are.
+ */
+function termProgress(data) {
+  const start = new Date((data && data.termStart) || TERM_WINDOW.starts);
+  const end = new Date((data && data.termEnd) || TERM_WINDOW.ends);
+  const span = end - start;
+  if (!(span > 0)) return null;
+
+  const frac = Math.max(0, Math.min(1, (new Date() - start) / span));
+  const week = Math.floor((new Date() - start) / (7 * 86400000)) + 1;
+  const weeks = Math.ceil(span / (7 * 86400000));
+  return { frac, label: frac >= 1 ? "term over" : `week ${Math.max(1, week)} of ${weeks}` };
+}
+
+function progressBar(into, frac, width) {
+  const track = into.addStack();
+  track.size = new Size(width, 3);
+  track.cornerRadius = 1.5;
+  track.backgroundColor = new Color("ffffff", 0.12);
+
+  const fill = track.addStack();
+  fill.size = new Size(Math.max(2, Math.round(width * frac)), 3);
+  fill.cornerRadius = 1.5;
+  fill.backgroundColor = new Color(BRAND.replace("#", ""), 0.9);
+}
 
 function sectionHeader(w, text, trailing) {
   const stack = w.addStack();
   stack.centerAlignContent();
   const label = stack.addText(text);
-  label.font = Font.semiboldSystemFont(11);
-  label.textColor = new Color(MUTED);
+  label.font = Font.semiboldSystemFont(10);
+  label.textColor = new Color(FAINT);
   if (trailing) {
     stack.addSpacer();
     const t = stack.addText(trailing);
-    t.font = Font.semiboldSystemFont(11);
+    t.font = Font.semiboldSystemFont(10);
     t.textColor = new Color(BAD);
   }
-  w.addSpacer(4);
+  w.addSpacer(5);
 }
 
 function buildWidget(data, note) {
   const family = config.widgetFamily || "large";
+  if (family.indexOf("accessory") === 0) return buildAccessory(family, data);
+
   const L = LAYOUT[family] || LAYOUT.large;
 
   const w = new ListWidget();
   w.setPadding(L.pad, L.pad, L.pad, L.pad);
-  w.backgroundColor = new Color(BG);
+  w.backgroundGradient = backdrop();
   // The feed names its own tap target, so this follows the board wherever it
   // actually lives without needing the script re-pasted.
   w.url = (data && data.boardUrl) || BOARD_URL;
 
   const head = w.addStack();
   head.centerAlignContent();
+  head.spacing = 5;
+
+  accentBar(head, BRAND, L.title + 2);
+
   const title = head.addText("Term Board");
   title.font = Font.boldSystemFont(L.title);
   title.textColor = new Color(INK);
   head.addSpacer();
 
   if (!data) {
-    w.addSpacer(6);
+    w.addSpacer(8);
     const msg = w.addText(note || "Couldn't reach the board.");
     msg.font = Font.systemFont(L.row);
     msg.textColor = new Color(MUTED);
@@ -399,16 +488,15 @@ function buildWidget(data, note) {
   if (L.grades === "inline") {
     if (grades.length) {
       for (const g of grades.slice(0, 3)) {
-        const cell = head.addStack();
+        const cell = chipStack(head, courseHex(g.course), 0.16, 2, 5);
         cell.spacing = 3;
-        cell.centerAlignContent();
         const code = cell.addText(shortCode(g.course));
         code.font = Font.mediumSystemFont(L.chip);
         code.textColor = courseColor(g.course);
         const pct = cell.addText(String(Math.round(g.percent)));
         pct.font = Font.boldSystemFont(L.chip);
         pct.textColor = gradeColor(g.percent);
-        head.addSpacer(6);
+        head.addSpacer(4);
       }
     } else {
       const none = head.addText(data.signedIn ? "no grades yet" : "sign in for grades");
@@ -417,8 +505,23 @@ function buildWidget(data, note) {
     }
   } else if (data.term) {
     const term = head.addText(data.term);
-    term.font = Font.systemFont(L.chip);
+    term.font = Font.mediumSystemFont(L.chip);
     term.textColor = new Color(FAINT);
+  }
+
+  // The term bar rides directly under the wordmark on large, where it reads as
+  // part of the header rather than as another row competing with the list.
+  const term = L.bar ? termProgress(data) : null;
+  if (term) {
+    w.addSpacer(6);
+    const strip = w.addStack();
+    strip.centerAlignContent();
+    strip.spacing = 6;
+    progressBar(strip, term.frac, 118);
+    const lab = strip.addText(term.label);
+    lab.font = Font.systemFont(8);
+    lab.textColor = new Color(FAINT);
+    strip.addSpacer();
   }
 
   w.addSpacer(L.headGap);
@@ -438,12 +541,15 @@ function buildWidget(data, note) {
       for (const g of grades.slice(0, 4)) {
         const row = w.addStack();
         row.centerAlignContent();
+        row.spacing = 6;
+        accentBar(row, courseHex(g.course), L.row);
         const name = row.addText(g.course);
         name.font = Font.systemFont(L.row);
-        name.textColor = courseColor(g.course);
+        name.textColor = new Color(INK);
         row.addSpacer();
-        const score = row.addText(g.grade);
-        score.font = Font.boldSystemFont(L.row);
+        const chip = chipStack(row, gradeHex(g.percent), 0.14, 1, 5);
+        const score = chip.addText(g.grade);
+        score.font = Font.boldSystemFont(L.row - 1);
         score.textColor = gradeColor(g.percent);
         w.addSpacer(L.gap);
       }
@@ -466,7 +572,9 @@ function buildWidget(data, note) {
     for (const a of list) {
       const row = w.addStack();
       row.centerAlignContent();
-      row.spacing = 4;
+      row.spacing = 5;
+
+      accentBar(row, courseHex(a.course), L.row + 1);
 
       const chip = row.addText(shortCode(a.course));
       chip.font = Font.mediumSystemFont(L.chip);
@@ -484,15 +592,26 @@ function buildWidget(data, note) {
       row.addSpacer();
 
       if (!a.conversationReady && a.textQuality && a.textQuality !== "unknown") {
-        const flag = row.addText("\u2691");
+        const flag = row.addText("⚑");
         flag.font = Font.systemFont(L.due - 2);
         flag.textColor = new Color(WARN);
       }
 
-      const due = row.addText(formatDue(a.due));
-      due.font = Font.systemFont(L.due);
-      due.textColor = new Color(dueColor(a.due));
-      due.lineLimit = 1;
+      // Urgent dates get the pill; everything else stays plain text, so the
+      // thing that is actually on fire is the only thing that glows.
+      const hex = dueHex(a.due);
+      if (daysUntil(a.due) <= 1) {
+        const pill = chipStack(row, hex, 0.18, 1, 5);
+        const due = pill.addText(formatDue(a.due));
+        due.font = Font.boldSystemFont(L.due - 1);
+        due.textColor = new Color(hex);
+        due.lineLimit = 1;
+      } else {
+        const due = row.addText(formatDue(a.due));
+        due.font = Font.systemFont(L.due);
+        due.textColor = new Color(hex);
+        due.lineLimit = 1;
+      }
 
       w.addSpacer(L.gap);
     }
@@ -507,6 +626,66 @@ function buildWidget(data, note) {
   return w;
 }
 
+/**
+ * Lock screen.
+ *
+ * The three accessory families are one line, one circle and a small rectangle,
+ * and none of them can afford a list. Each shows the single next thing, which
+ * is all anyone reads off a lock screen anyway. They are tinted by iOS, so
+ * colour is not available here — everything has to carry in the words.
+ */
+function buildAccessory(family, data) {
+  const w = new ListWidget();
+  w.addAccessoryWidgetBackground = true;
+  w.url = (data && data.boardUrl) || BOARD_URL;
+
+  const next = data ? [...overdue(data), ...upcoming(data, 1)][0] : null;
+
+  if (family === "accessoryInline") {
+    w.addText(next ? `${shortCode(next.course)} ${next.title} · ${formatDue(next.due)}` : "Term Board");
+    return w;
+  }
+
+  if (family === "accessoryCircular") {
+    w.setPadding(2, 2, 2, 2);
+    const stack = w.addStack();
+    stack.layoutVertically();
+    stack.centerAlignContent();
+
+    const d = next ? daysUntil(next.due) : null;
+    const big = stack.addText(d == null ? "—" : d < 0 ? "!" : String(d));
+    big.font = Font.boldSystemFont(20);
+    big.centerAlignText();
+
+    const small = stack.addText(next ? shortCode(next.course) : "clear");
+    small.font = Font.systemFont(9);
+    small.centerAlignText();
+    small.lineLimit = 1;
+    return w;
+  }
+
+  // accessoryRectangular
+  w.setPadding(2, 2, 2, 2);
+  const late = data ? overdue(data) : [];
+  const head = w.addText(late.length ? `${late.length} overdue` : "Due next");
+  head.font = Font.semiboldSystemFont(11);
+
+  if (!next) {
+    const none = w.addText("Nothing on the board");
+    none.font = Font.systemFont(12);
+    return w;
+  }
+
+  const title = w.addText(next.title);
+  title.font = Font.semiboldSystemFont(13);
+  title.lineLimit = 1;
+
+  const sub = w.addText(`${shortCode(next.course)} · ${formatDue(next.due)}`);
+  sub.font = Font.systemFont(11);
+  sub.lineLimit = 1;
+  return w;
+}
+
 function footerText(data, lateCount, carryOverdue) {
   // On the sizes with no "DUE SOON · n overdue" label, the count has nowhere
   // else to go, so it leads the footer.
@@ -516,6 +695,38 @@ function footerText(data, lateCount, carryOverdue) {
   if (data.seeded) return prefix + "Seeded — awaiting first scrape";
   if (age > 36) return prefix + `Stale — ${Math.round(age / 24)}d ago`;
   return prefix + "Tap for full board";
+}
+
+// -------------------------------------------------------------- reading
+
+/**
+ * The Read Aloud script, if it is installed.
+ *
+ * Kept as a separate Scriptable script rather than folded in here, because it
+ * is also useful on its own: it takes a share-sheet PDF from anywhere on the
+ * phone, and most of what it reads has nothing to do with this term. The flag
+ * is what stops importing it from opening its own menu — importModule runs the
+ * whole file, so the entry point has to be behind something the importer can
+ * set.
+ *
+ * Returns null when it is not installed, and every caller treats that as "the
+ * button simply is not offered" rather than as an error.
+ */
+let readerModule;
+function reader() {
+  if (readerModule !== undefined) return readerModule;
+  readerModule = null;
+  for (const name of ["Read Aloud", "ReadAloud"]) {
+    try {
+      global.READ_ALOUD_AS_MODULE = true;
+      readerModule = importModule(name);
+      break;
+    } catch (e) {
+      // Not installed under that name. Try the next one.
+    }
+  }
+  if (!readerModule) console.log("Read Aloud is not installed — the read buttons are hidden.");
+  return readerModule;
 }
 
 // ------------------------------------------------------------ in-app UI
@@ -536,6 +747,19 @@ async function presentBoard(data, token) {
     src.height = 40;
     src.addText("Data source", String(data.source).replace(/^https:\/\//, ""));
     table.addRow(src);
+  }
+
+  const rd = reader();
+  if (rd) {
+    const row = new UITableRow();
+    row.height = 52;
+    row.dismissOnSelect = false;
+    row.addText("Read a PDF aloud", "Any PDF on the phone. Scans get OCR'd first.");
+    row.onSelect = async () => {
+      const paths = await rd.pickPdf();
+      for (const path of paths) await rd.read(path);
+    };
+    table.addRow(row);
   }
 
   const gradeRow = new UITableRow();
@@ -598,13 +822,24 @@ function assignmentRow(a, token) {
   const flag = a.conversationReady ? "" : "  ⚑ no clean text";
   const subtitle = `${shortCode(a.course)} · ${formatDue(a.due)} · ${a.category}${score}${flag}`;
 
+  // Both actions need a readable assignment and a signed-in session, because
+  // the text they work from lives in Supabase. Neither is offered otherwise.
+  const offer = a.conversationReady && token;
+  const canRead = offer && Boolean(reader());
+
   const main = row.addText(a.title, subtitle);
-  main.widthWeight = a.conversationReady && token ? 72 : 100;
+  main.widthWeight = offer ? (canRead ? 52 : 72) : 100;
   main.subtitleFont = Font.systemFont(11);
 
-  // The action needs both a readable assignment and a signed-in session to
-  // fetch the text, so it is only offered when both are true.
-  if (a.conversationReady && token) {
+  if (canRead) {
+    const listen = row.addButton("Listen");
+    listen.widthWeight = 20;
+    listen.onTap = async () => {
+      await listenTo(token, a);
+    };
+  }
+
+  if (offer) {
     const button = row.addButton("Start Conversation");
     button.widthWeight = 28;
     button.onTap = async () => {
@@ -613,6 +848,37 @@ function assignmentRow(a, token) {
   }
 
   return row;
+}
+
+/**
+ * Hands an assignment's reading to Read Aloud.
+ *
+ * The bodies come back as separate pieces — the assignment page, then each
+ * attachment — and they are labelled on the way in, so what you hear opens
+ * with "Instructions" or "Chapter 4" rather than dropping you into the middle
+ * of a paragraph with no idea which document it belongs to.
+ */
+async function listenTo(token, assignment) {
+  const rd = reader();
+  if (!rd) return;
+
+  const reading = await fetchReading(token, assignment.id);
+  if (!reading || !reading.bodies || !reading.bodies.length) {
+    const a = new Alert();
+    a.title = "Nothing to read";
+    a.message =
+      "The scraper found no extractable text for this one. Open it on Learning " +
+      "Suite and share the PDF to Read Aloud instead — it will OCR a scan.";
+    a.addAction("OK");
+    await a.presentAlert();
+    return;
+  }
+
+  const text = reading.bodies
+    .map((b) => `${b.label}\n\n${String(b.text || "").trim()}`)
+    .join("\n\n");
+
+  await rd.readText(`${assignment.course} · ${assignment.title}`, text);
 }
 
 // ------------------------------------------------- start a conversation

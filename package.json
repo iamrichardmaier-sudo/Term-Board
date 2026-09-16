@@ -17,7 +17,8 @@
     "calibrate": "node src/index.js calibrate",
     "doctor": "node src/index.js doctor",
     "render": "node src/index.js render",
-    "web": "node src/index.js web"
+    "web": "node src/index.js web",
+    "test": "node test/smoke.mjs && node test/widget-logic.mjs && node test/widget-fit.mjs && node test/reader.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

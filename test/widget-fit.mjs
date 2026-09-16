@@ -16,47 +16,61 @@ import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import vm from "node:vm";
 
-// Usable inner height on a common iPhone, less the widget's own padding.
-const USABLE = { small: 141, medium: 141, large: 305 };
+// Usable inner height on a common iPhone, less the widget's own padding. The
+// accessory families are the lock screen, where iOS gives every widget the
+// same small box whatever the phone.
+const USABLE = {
+  small: 141, medium: 141, large: 305,
+  accessoryCircular: 72, accessoryRectangular: 72, accessoryInline: 20,
+};
 
 const source = await fs.readFile(new URL("../scriptable/TermBoard.js", import.meta.url), "utf8");
 const body = source.replace(/await run\(\);\s*$/, "");
 
 function makeHarness(family) {
-  const lines = [];
-
-  class Text {
-    constructor(size) { this.size = size; }
-    set font(f) { this.size = f; }
-    set textColor(_) {} set lineLimit(_) {} set minimumScaleFactor(_) {}
-  }
-  class Stack {
-    constructor(sink) { this.sink = sink; this.max = 0; }
-    addText(t) { const x = new Text(0); this.sink.pending.push(x); this._track(x); return x; }
-    addStack() { return this; }
-    addSpacer() {} centerAlignContent() {} set spacing(_) {} layoutHorizontally() {}
-    _track(x) { this.sink.current.push(x); }
-  }
-
   const widget = {
     _items: [],
+    _pad: 0,
     setPadding(t, _r, b) { this._pad = t + b; },
-    set backgroundColor(_) {} , set url(_) {},
-    addText(s) { const x = { size: 12 }; widget._items.push({ kind: "line", ref: x }); 
-      return { set font(v) { x.size = v; }, set textColor(_) {}, set lineLimit(_) {}, set minimumScaleFactor(_) {} }; },
+    set backgroundColor(_) {},
+    set backgroundGradient(_) {},
+    set addAccessoryWidgetBackground(_) {},
+    set url(_) {},
+
+    addText() {
+      const x = { size: 12 };
+      widget._items.push({ kind: "line", ref: x });
+      return text(x);
+    },
     addSpacer(n) { widget._items.push({ kind: "spacer", value: n }); },
     addStack() {
       const group = { kind: "line", refs: [] };
       widget._items.push(group);
-      const st = {
-        addText() { const x = { size: 12 }; group.refs.push(x);
-          return { set font(v) { x.size = v; }, set textColor(_) {}, set lineLimit(_) {}, set minimumScaleFactor(_) {} }; },
-        addStack() { return st; },
-        addSpacer() {}, centerAlignContent() {}, set spacing(_) {}, layoutHorizontally() {},
-      };
-      return st;
+      return stack(group);
     },
   };
+
+  // A text or an image sets the height of the row it is in; so does a stack
+  // given an explicit size, which is how the accent bars and the progress bar
+  // are drawn. Everything lands in the same group so the row is measured by
+  // its tallest thing, which is what iOS does.
+  const text = (x) => ({
+    set font(v) { x.size = v; },
+    set textColor(_) {}, set lineLimit(_) {}, set minimumScaleFactor(_) {},
+    set centerAlignText(_) {}, centerAlignText() {},
+  });
+
+  const stack = (group) => ({
+    addText() { const x = { size: 12 }; group.refs.push(x); return text(x); },
+    addStack() { return stack(group); },
+    addImage() { const x = { size: 0 }; group.refs.push(x); return { set imageSize(v) { x.size = v.height; }, set tintColor(_) {}, set resizable(_) {}, set cornerRadius(_) {} }; },
+    addSpacer() {},
+    setPadding() {},
+    centerAlignContent() {}, layoutVertically() {}, layoutHorizontally() {},
+    set spacing(_) {}, set backgroundColor(_) {}, set cornerRadius(_) {},
+    set borderWidth(_) {}, set borderColor(_) {}, set url(_) {},
+    set size(v) { group.refs.push({ size: v.height }); },
+  });
 
   const font = (n) => n;
   const stub = () => new Proxy(function () {}, { get: () => stub(), apply: () => stub() });
@@ -67,22 +81,32 @@ function makeHarness(family) {
       config: { runsInWidget: true, widgetFamily: family },
       console: { log() {}, warn() {}, error() {} },
       ListWidget: function () { return widget; },
-      Color: function () {}, Device: stub(),
+      Color: function () {},
+      Size: function (width, height) { this.width = width; this.height = height; },
+      Point: function (x, y) { this.x = x; this.y = y; },
+      LinearGradient: function () {
+        this.colors = []; this.locations = []; this.startPoint = null; this.endPoint = null;
+      },
+      Device: stub(),
       Font: { boldSystemFont: font, systemFont: font, mediumSystemFont: font, semiboldSystemFont: font },
       DateFormatter: function () { this.dateFormat = ""; this.string = () => "Sep 3"; },
       Request: stub(), Keychain: stub(), FileManager: stub(), Alert: stub(),
       UITable: stub(), UITableRow: stub(), Safari: stub(), Pasteboard: stub(), Script: stub(),
+      SFSymbol: { named: () => ({ image: {} }) },
+      global: {},
+      importModule: () => { throw new Error("not available in the harness"); },
     }),
   };
 }
 
 const board = JSON.parse(await fs.readFile(new URL("../docs/board.json", import.meta.url), "utf8"));
 
-console.log("size    padding  nominal   worst    usable   verdict");
+console.log("size                  padding  nominal   worst    usable   verdict");
 let failures = 0;
 
-for (const family of ["small", "medium", "large"]) {
+for (const family of ["small", "medium", "large", "accessoryCircular", "accessoryRectangular", "accessoryInline"]) {
   const { widget, context } = makeHarness(family);
+  widget._items.length = 0;
   vm.runInContext(`${body}\nglobalThis.__build = buildWidget;`, context);
 
   const data = { ...board, grades: [
@@ -113,7 +137,7 @@ for (const family of ["small", "medium", "large"]) {
   const fits = worst <= usable;
   if (!fits) failures++;
   console.log(
-    `${family.padEnd(8)}${String(pad).padEnd(9)}${String(nominal).padEnd(10)}` +
+    `${family.padEnd(22)}${String(pad).padEnd(9)}${String(nominal).padEnd(10)}` +
     `${String(worst).padEnd(9)}${String(usable).padEnd(9)}` +
     `${fits ? "fits" : "OVERFLOWS at 1.4"}`,
   );
