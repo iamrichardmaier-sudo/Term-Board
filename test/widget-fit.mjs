@@ -93,7 +93,6 @@ function makeHarness(family) {
       Request: stub(), Keychain: stub(), FileManager: stub(), Alert: stub(),
       UITable: stub(), UITableRow: stub(), Safari: stub(), Pasteboard: stub(), Script: stub(),
       SFSymbol: { named: () => ({ image: {} }) },
-      global: {},
       importModule: () => { throw new Error("not available in the harness"); },
     }),
   };

@@ -36,7 +36,7 @@
  *      voice that is genuinely hard to tell from a person.
  */
 
-const VERSION = "2026-09-16a";
+const VERSION = "2026-09-16b";
 
 const REPO = "iamrichardmaier-sudo/Term-Board";
 
@@ -400,10 +400,39 @@ async function main() {
 }
 
 // Term Board imports this file to hand a reading straight over. `importModule`
-// runs the whole script, so the menu has to be behind a flag the importer sets
-// rather than run on import.
+// runs the whole script top to bottom, so the menu has to be suppressed on
+// import or opening a reading would pop a file picker first.
 module.exports = { read, readText, pickPdf, downloadPdf, setUpVoice, playerHtml, VERSION };
 
-if (!global.READ_ALOUD_AS_MODULE) {
+/**
+ * Whether this run is an import rather than the script itself.
+ *
+ * Two independent tests, because neither is guaranteed on its own. The flag
+ * only works if Scriptable evaluates both scripts in one JavaScript context,
+ * which is not something to bet the entry point on; the filename test only
+ * works if `module.filename` is populated. Either one saying "imported" is
+ * enough, and if both are unavailable this falls through to running normally,
+ * which is the right default for a script someone just tapped.
+ *
+ * `globalThis`, not `global` — Scriptable runs on JavaScriptCore, where the
+ * Node spelling does not exist and throws a ReferenceError on sight.
+ */
+function importedAsModule() {
+  if (typeof globalThis !== "undefined" && globalThis.READ_ALOUD_AS_MODULE === true) return true;
+
+  // Script.name() is the script that was *run*; module.filename is the file
+  // being evaluated. They differ only on an import. Both have to be readable
+  // for the comparison to mean anything — if either is missing the answer is
+  // "not imported", because a script that silently does nothing when tapped is
+  // a far worse failure than a stray menu.
+  try {
+    const entry = Script.name();
+    const here = module.filename.split("/").pop().replace(/\.js$/i, "");
+    if (entry && here) return here !== entry;
+  } catch (e) {}
+  return false;
+}
+
+if (!importedAsModule()) {
   await main();
 }

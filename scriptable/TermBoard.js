@@ -40,7 +40,7 @@
  * every run, so "which version is actually on the phone?" is answerable in two
  * seconds instead of by reading a diff.
  */
-const VERSION = "2026-09-16a";
+const VERSION = "2026-09-16b";
 
 const REPO = "iamrichardmaier-sudo/Term-Board";
 
@@ -718,7 +718,8 @@ function reader() {
   readerModule = null;
   for (const name of ["Read Aloud", "ReadAloud"]) {
     try {
-      global.READ_ALOUD_AS_MODULE = true;
+      // globalThis, not global: Scriptable is JavaScriptCore, not Node.
+      globalThis.READ_ALOUD_AS_MODULE = true;
       readerModule = importModule(name);
       break;
     } catch (e) {
